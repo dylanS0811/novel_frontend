@@ -22,6 +22,32 @@ function extractIds(resp) {
   return [];
 }
 
+function sortComments(arr = []) {
+  return arr
+    .map((c) => ({ ...c, replies: sortComments(c.replies || []) }))
+    .sort(
+      (a, b) =>
+        (b.likes || 0) - (a.likes || 0) ||
+        new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+    );
+}
+
+function buildCommentTree(list = []) {
+  const map = {};
+  list.forEach((c) => {
+    map[c.id] = { ...c, replies: [] };
+  });
+  const roots = [];
+  list.forEach((c) => {
+    if (c.parentId && map[c.parentId]) {
+      map[c.parentId].replies.push(map[c.id]);
+    } else {
+      roots.push(map[c.id]);
+    }
+  });
+  return sortComments(roots);
+}
+
 export function AppProvider({ children }) {
   const [nick, setNick] = useState("一颗麦穗");
   const [avatar, setAvatar] = useState("");
@@ -198,29 +224,76 @@ export function AppProvider({ children }) {
     }
   };
 
-  // 发表评论
-  const addComment = async (text) => {
+  // 发表评论或回复
+  const addComment = async (text, parentId) => {
     const bookId = commentsOpen?.item?.id;
     if (!bookId) return;
     try {
       const payload = { text, userId: user?.id ?? 1 };
+      if (parentId) payload.parentId = parentId;
       const c = await bookApi.addComment(Number(bookId), payload);
       const created =
         c?.data ||
         c || {
+          id: Date.now(),
           userName: nick,
           userAvatar: avatar || "https://i.pravatar.cc/80?img=15",
           text,
           createdAt: new Date().toISOString(),
+          likes: 0,
+          parentId: parentId ?? null,
         };
       setCommentsMap((m) => {
         const next = { ...m };
-        next[Number(bookId)] = [...(next[Number(bookId)] || []), created];
+        const key = Number(bookId);
+        const list = next[key] ? [...next[key]] : [];
+        if (parentId) {
+          const insert = (arr) =>
+            arr.map((item) => {
+              if (item.id === parentId) {
+                return {
+                  ...item,
+                  replies: sortComments([...(item.replies || []), created]),
+                };
+              }
+              if (item.replies)
+                return { ...item, replies: insert(item.replies) };
+              return item;
+            });
+          next[key] = insert(list);
+        } else {
+          next[key] = sortComments([...list, { ...created, replies: [] }]);
+        }
         return next;
       });
     } catch (e) {
       console.error("addComment failed", e);
     }
+  };
+
+  const toggleCommentLike = (commentId) => {
+    const bookId = commentsOpen?.item?.id;
+    if (!bookId) return;
+    setCommentsMap((m) => {
+      const key = Number(bookId);
+      const update = (arr) =>
+        sortComments(
+          arr.map((item) => {
+            if (item.id === commentId) {
+              const liked = item.liked;
+              return {
+                ...item,
+                liked: !liked,
+                likes: (item.likes || 0) + (liked ? -1 : 1),
+              };
+            }
+            if (item.replies)
+              return { ...item, replies: update(item.replies) };
+            return item;
+          })
+        );
+      return { ...m, [key]: update(m[key] || []) };
+    });
   };
 
   // 拉列表
@@ -323,7 +396,8 @@ export function AppProvider({ children }) {
         const res = await bookApi.comments(Number(bookId), 1, 30);
         const data = res?.data || res || {};
         const list = data.list ?? data.items ?? [];
-        if (!aborted) setCommentsMap((m) => ({ ...m, [Number(bookId)]: list }));
+        const tree = buildCommentTree(list);
+        if (!aborted) setCommentsMap((m) => ({ ...m, [Number(bookId)]: tree }));
       } catch (e) {
         console.error("load comments failed", e);
       }
@@ -418,6 +492,7 @@ export function AppProvider({ children }) {
       setCommentsOpen,
       commentsMap,
       addComment,
+      toggleCommentLike,
 
       // 筛选
       tab,

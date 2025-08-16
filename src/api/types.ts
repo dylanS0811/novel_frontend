@@ -31,6 +31,10 @@ export interface Comment {
   userAvatar?: string;
   text: string;
   createdAt: string;
+  likes?: number;
+  liked?: boolean;
+  parentId?: number | null;
+  replies?: Comment[];
 }
 
 // —— 通知
