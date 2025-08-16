@@ -119,16 +119,25 @@ export const bookApi = {
       { params: { userId } },
     ),
 
-  comments: (id: number, page = 1, size = 20) =>
+  comments: (id: number, page = 1, size = 20, userId?: number) =>
     http.get<{
       list: CommentItem[];
       page: number;
       size: number;
       total: number;
-    }>(`/api/books/${id}/comments`, { params: { page, size } }),
+    }>(`/api/books/${id}/comments`, { params: { userId, page, size } }),
 
   addComment: (id: number, payload: { text: string; userId: number; parentId?: number }) =>
     http.post<CommentItem>(`/api/books/${id}/comments`, payload),
+
+  likeComment: (id: number, userId: number) =>
+    http.post<CommentItem>(`/api/comments/${id}/likes`, null, {
+      params: { userId },
+    }),
+  unlikeComment: (id: number, userId: number) =>
+    http.delete<CommentItem>(`/api/comments/${id}/likes`, {
+      params: { userId },
+    }),
 
   /** ===== 新增：按用户取“我点过赞/我收藏过”的书 ID 列表 ===== */
   userLikes: (userId: number) =>

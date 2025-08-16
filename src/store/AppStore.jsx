@@ -33,6 +33,11 @@ function sortComments(arr = []) {
 }
 
 function buildCommentTree(list = []) {
+  // 如果后端已返回树形结构，直接排序后返回
+  if (list.some((c) => Array.isArray(c.replies) && c.replies.length > 0)) {
+    return sortComments(list);
+  }
+  // 否则根据 parentId 构建树
   const map = {};
   list.forEach((c) => {
     map[c.id] = { ...c, replies: [] };
@@ -46,6 +51,17 @@ function buildCommentTree(list = []) {
     }
   });
   return sortComments(roots);
+}
+
+function findCommentDepth(arr = [], targetId, depth = 0) {
+  for (const c of arr) {
+    if (c.id === targetId) return depth;
+    if (c.replies) {
+      const d = findCommentDepth(c.replies, targetId, depth + 1);
+      if (d !== -1) return d;
+    }
+  }
+  return -1;
 }
 
 export function AppProvider({ children }) {
@@ -228,6 +244,13 @@ export function AppProvider({ children }) {
   const addComment = async (text, parentId) => {
     const bookId = commentsOpen?.item?.id;
     if (!bookId) return;
+    if (parentId) {
+      const depth = findCommentDepth(commentsMap[Number(bookId)] || [], parentId);
+      if (depth >= 2) {
+        alert("最多只能回复到第3层");
+        return;
+      }
+    }
     try {
       const payload = { text, userId: user?.id ?? 1 };
       if (parentId) payload.parentId = parentId;
@@ -271,29 +294,46 @@ export function AppProvider({ children }) {
     }
   };
 
-  const toggleCommentLike = (commentId) => {
+  const toggleCommentLike = async (commentId) => {
     const bookId = commentsOpen?.item?.id;
     if (!bookId) return;
-    setCommentsMap((m) => {
-      const key = Number(bookId);
-      const update = (arr) =>
-        sortComments(
-          arr.map((item) => {
-            if (item.id === commentId) {
-              const liked = item.liked;
-              return {
-                ...item,
-                liked: !liked,
-                likes: (item.likes || 0) + (liked ? -1 : 1),
-              };
-            }
-            if (item.replies)
-              return { ...item, replies: update(item.replies) };
-            return item;
-          })
-        );
-      return { ...m, [key]: update(m[key] || []) };
-    });
+    const key = Number(bookId);
+    const list = commentsMap[key] || [];
+    const find = (arr) => {
+      for (const it of arr) {
+        if (it.id === commentId) return it;
+        if (it.replies) {
+          const r = find(it.replies);
+          if (r) return r;
+        }
+      }
+      return null;
+    };
+    const target = find(list);
+    if (!target) return;
+    try {
+      const liked = target.liked;
+      const res = liked
+        ? await bookApi.unlikeComment(commentId, user?.id ?? 1)
+        : await bookApi.likeComment(commentId, user?.id ?? 1);
+      const updated = res?.data || res || {};
+      setCommentsMap((m) => {
+        const replace = (arr) =>
+          sortComments(
+            arr.map((item) => {
+              if (item.id === commentId) {
+                return { ...item, ...updated };
+              }
+              if (item.replies)
+                return { ...item, replies: replace(item.replies) };
+              return item;
+            })
+          );
+        return { ...m, [key]: replace(m[key] || []) };
+      });
+    } catch (e) {
+      console.error("toggle comment like failed", e);
+    }
   };
 
   // 拉列表
@@ -393,7 +433,12 @@ export function AppProvider({ children }) {
     let aborted = false;
     (async () => {
       try {
-        const res = await bookApi.comments(Number(bookId), 1, 30);
+        const res = await bookApi.comments(
+          Number(bookId),
+          1,
+          30,
+          user?.id ?? 1
+        );
         const data = res?.data || res || {};
         const list = data.list ?? data.items ?? [];
         const tree = buildCommentTree(list);
@@ -405,7 +450,7 @@ export function AppProvider({ children }) {
     return () => {
       aborted = true;
     };
-  }, [commentsOpen.open, commentsOpen.item]);
+  }, [commentsOpen.open, commentsOpen.item, user]);
 
   // 用户变化：拉我的点赞/收藏 → 初始化高亮
   useEffect(() => {

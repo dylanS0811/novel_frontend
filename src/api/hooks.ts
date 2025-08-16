@@ -168,16 +168,18 @@ export const useBookmarkBook = () => {
 // 评论列表
 export const useComments = ({
   id,
+  userId,
   page = 1,
   size = 20,
 }: {
   id?: number;
+  userId?: number;
   page?: number;
   size?: number;
 }) =>
   useQuery({
-    queryKey: ['comments', id, page, size] as QueryKey,
-    queryFn: () => bookApi.comments(id as number, page, size),
+    queryKey: ['comments', id, userId, page, size] as QueryKey,
+    queryFn: () => bookApi.comments(id as number, page, size, userId),
     enabled: id != null,
     placeholderData: (prev) => prev,
   });
