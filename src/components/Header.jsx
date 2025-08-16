@@ -224,7 +224,7 @@ export default function Header(props) {
             <Bell className="w-6 h-6 text-gray-700" />
             {store.unreadCount > 0 && (
               <span className="absolute -top-1 -right-1 min-w-[16px] h-4 px-1 text-[10px] bg-rose-500 text-white rounded-full flex items-center justify-center">
-                {store.unreadCount}
+                {store.unreadCount > 99 ? '99+' : store.unreadCount}
               </span>
             )}
           </button>

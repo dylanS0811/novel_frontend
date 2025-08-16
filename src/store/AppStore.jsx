@@ -314,9 +314,27 @@ export function AppProvider({ children }) {
 
   const addNotification = (n) =>
     setNotifications((arr) => [
-      { id: "n" + Math.random().toString(36).slice(2), read: false, ...n },
+      {
+        id: n.id ?? "n" + Math.random().toString(36).slice(2),
+        read: n.read ?? false,
+        ...n,
+      },
       ...arr,
     ]);
+
+  const markNotificationRead = async (id) => {
+    try {
+      if (user?.id && typeof id === "number") {
+        await notificationApi.readOne(id, user.id);
+      }
+    } catch (e) {
+      console.error("mark notification read failed", e);
+    } finally {
+      setNotifications((arr) =>
+        arr.map((n) => (n.id === id ? { ...n, read: true } : n))
+      );
+    }
+  };
 
   const markAllRead = async () => {
     try {
@@ -735,6 +753,7 @@ export function AppProvider({ children }) {
       notifyOpen,
       setNotifyOpen,
       addNotification,
+      markNotificationRead,
       markAllRead,
       removeNotification,
       clearNotifications,
