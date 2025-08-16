@@ -295,6 +295,19 @@ export function AppProvider({ children }) {
     }
   };
 
+  const moveBookToSheet = async (fromId, book, toId) => {
+    try {
+      await sheetApi.moveBook(fromId, book.id, toId);
+      if (fromId === activeSheetId)
+        setSheetBooks((prev) => prev.filter((x) => x.id !== book.id));
+      if (toId === activeSheetId)
+        setSheetBooks((prev) => [...prev, book]);
+    } catch (e) {
+      console.error("move book to sheet failed", e);
+      throw e;
+    }
+  };
+
   // ===== 通知中心 =====
   const [notifications, setNotifications] = useState([]);
   const [notifyOpen, setNotifyOpen] = useState(false);
@@ -715,6 +728,7 @@ export function AppProvider({ children }) {
       addBookToSheet,
       updateBookInSheet,
       removeBookFromSheet,
+      moveBookToSheet,
 
       // 通知
       notifications,
@@ -755,6 +769,7 @@ export function AppProvider({ children }) {
       notifications,
       notifyOpen,
       unreadCount,
+      moveBookToSheet,
     ]
   );
 
