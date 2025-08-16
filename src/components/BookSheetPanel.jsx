@@ -1,204 +1,202 @@
 // src/components/BookSheetPanel.jsx
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 import { useAppStore } from "../store/AppStore";
 import { THEME } from "../lib/theme";
 import { classNames, formatDate } from "../lib/utils";
 import BottomSheetForm from "./modals/BottomSheetForm";
+import ConfirmModal from "./modals/ConfirmModal"; // ✅ 新增：删除书单前确认
 
+// 纯UI组件
+import SidebarList from "./ui/SidebarList";
+import BookListRow from "./ui/BookListRow";
+import EmptyState from "./ui/EmptyState";
+
+/**
+ * 左侧：竖排书单；右侧：书籍“行式列表”
+ * 保留 BottomSheetForm 的新增/编辑能力；本次仅加入“删除书单确认弹窗”
+ */
 export default function BookSheetPanel() {
   const {
+    // 数据
     sheets,
     sheetBooks,
     activeSheetId,
+
+    // 行为
     setActiveSheetId,
     addSheet,
     renameSheet,
     removeSheet,
+
     addBookToSheet,
     updateBookInSheet,
     removeBookFromSheet,
   } = useAppStore();
 
-  const activeSheet = sheets.find((s) => s.id === activeSheetId);
+  // 当前激活书单
+  const activeSheet = useMemo(
+    () => (sheets || []).find((s) => s.id === activeSheetId) || null,
+    [sheets, activeSheetId]
+  );
 
+  // 右侧书籍列表（兼容数组或 map 结构）
+  const books = useMemo(() => {
+    if (!activeSheetId) return [];
+    const src = sheetBooks;
+    if (Array.isArray(src)) return src;
+    if (src && typeof src === "object") return src[activeSheetId] || [];
+    return [];
+  }, [sheetBooks, activeSheetId]);
+
+  // ===== 弹层状态（书单） =====
   const [listFormOpen, setListFormOpen] = useState(false);
   const [editingSheet, setEditingSheet] = useState(null);
+
+  // ✅ 删除确认弹窗状态
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [pendingDeleteSheet, setPendingDeleteSheet] = useState(null);
+
+  // ===== 弹层状态（书籍） =====
   const [bookFormOpen, setBookFormOpen] = useState(false);
   const [editingBook, setEditingBook] = useState(null);
 
-  const handleAddSheet = () => {
+  // ===== 书单：新增 / 重命名 =====
+  const openCreateSheet = () => {
     setEditingSheet(null);
     setListFormOpen(true);
   };
-
-  const handleRenameSheet = (id, name) => {
-    setEditingSheet({ id, name });
+  const openRenameSheet = (sheet) => {
+    setEditingSheet(sheet);
     setListFormOpen(true);
   };
-
-  const handleRemoveSheet = (id) => {
-    if (window.confirm("确定删除该书单吗？")) removeSheet(id);
-  };
-
-  const submitSheet = async (payload) => {
-    const name = payload?.name || "";
-    if (editingSheet) await renameSheet(editingSheet.id, name);
-    else await addSheet(name);
+  const submitSheet = async (values) => {
+    const name = values?.name ?? values?.title ?? "";
+    if (editingSheet?.id) {
+      await renameSheet(editingSheet.id, name);
+    } else {
+      await addSheet(name);
+    }
     setListFormOpen(false);
+    setEditingSheet(null);
   };
 
-  const handleAddBook = () => {
-    if (!activeSheet) return;
+  // ✅ 书单：删除前先弹确认框
+  const requestDeleteSheet = (sheet) => {
+    setPendingDeleteSheet(sheet);
+    setConfirmOpen(true);
+  };
+  const handleConfirmDeleteSheet = async () => {
+    if (pendingDeleteSheet?.id) {
+      await removeSheet(pendingDeleteSheet.id);
+    }
+    setConfirmOpen(false);
+    setPendingDeleteSheet(null);
+  };
+  const handleCancelDeleteSheet = () => {
+    setConfirmOpen(false);
+    setPendingDeleteSheet(null);
+  };
+
+  // ===== 书籍：新增 / 编辑 / 删除 =====
+  const openCreateBook = () => {
     setEditingBook(null);
     setBookFormOpen(true);
   };
-
-  const handleEditBook = (b) => {
-    setEditingBook(b);
+  const openEditBook = (book) => {
+    setEditingBook(book);
     setBookFormOpen(true);
   };
-
-  const submitBook = async (payload) => {
-    if (!activeSheet) return;
-    if (editingBook) await updateBookInSheet(activeSheet.id, editingBook.id, payload);
-    else await addBookToSheet(activeSheet.id, payload);
+  const submitBook = async (values) => {
+    if (!activeSheetId) return;
+    if (editingBook?.id) {
+      await updateBookInSheet(activeSheetId, editingBook.id, values);
+    } else {
+      await addBookToSheet(activeSheetId, values);
+    }
     setBookFormOpen(false);
+    setEditingBook(null);
+  };
+  const deleteBook = async (book) => {
+    if (!activeSheetId) return;
+    await removeBookFromSheet(activeSheetId, book.id);
   };
 
   return (
     <>
-      <div className="mb-6">
-        <div className="flex items-center justify-between mb-3">
-          <span className="font-semibold">我的书单</span>
-          <button onClick={handleAddSheet} className="text-xs text-blue-500">
-            新增
-          </button>
-        </div>
-        {sheets.length === 0 ? (
-          <div className="text-sm text-gray-500">暂无书单</div>
-        ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-            {sheets.map((s) => (
-              <div
-                key={s.id}
-                onClick={() => setActiveSheetId(s.id)}
-                className={classNames(
-                  "group relative p-4 rounded-2xl border cursor-pointer transition hover:shadow-sm",
-                  activeSheetId === s.id && "ring-2 ring-rose-300"
-                )}
-                style={{ borderColor: THEME.border }}
-              >
-                <div className="font-semibold mb-1 truncate">{s.name}</div>
-                <div className="text-xs text-gray-500 mb-1">
-                  {s.bookCount ?? 0} 本书
-                </div>
-                <div className="text-[11px] text-gray-400">
-                  更新 {formatDate(s.updatedAt)}
-                </div>
-                <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 flex gap-1 text-[11px]">
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleRenameSheet(s.id, s.name);
-                    }}
-                    className="text-blue-500"
-                  >
-                    编辑
-                  </button>
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleRemoveSheet(s.id);
-                    }}
-                    className="text-red-500"
-                  >
-                    删除
-                  </button>
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
-
-      {activeSheet ? (
-        <>
-          <div className="flex items-center justify-between mb-3">
-            <span className="font-semibold">
-              {activeSheet.name}（{sheetBooks.length}）
-            </span>
+      {/* 主体：两栏布局 */}
+      <div className="mt-4 grid grid-cols-1 lg:grid-cols-[300px,1fr] gap-6">
+        {/* 左侧竖排书单 */}
+        <aside className="lg:sticky lg:top-20 h-fit space-y-3">
+          <div className="flex items-center justify-between">
+            <div className="text-sm font-semibold text-gray-700">我的书单</div>
             <button
-              onClick={handleAddBook}
-              className="text-xs text-blue-500"
+              onClick={openCreateSheet}
+              className="text-xs text-pink-500 hover:underline"
             >
-              添加书籍
+              新增
             </button>
           </div>
-          {sheetBooks.length === 0 ? (
-            <div className="text-sm text-gray-500">暂无书籍</div>
-          ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-              {sheetBooks.map((b) => (
-                <div
+
+          <SidebarList
+            items={(sheets || []).map((s) => ({
+              id: s.id,
+              title: s.name || s.title || "未命名书单",
+              subtitle:
+                "更新 " + (s.updatedAt ? formatDate(s.updatedAt) : "—"),
+              badge:
+                typeof s.bookCount === "number" ? `${s.bookCount} 本书` : undefined,
+              active: s.id === activeSheetId,
+              onClick: () => setActiveSheetId(s.id),
+              onEdit: () => openRenameSheet(s),
+              onDelete: () => requestDeleteSheet(s), // ✅ 改为先请求确认
+            }))}
+            emptyHint="还没有书单"
+          />
+        </aside>
+
+        {/* 右侧该书单下的书籍列表 */}
+        <section className="min-h-[320px]">
+          <div className="flex items-center justify-between mb-3">
+            <div className="text-sm font-semibold text-gray-700">
+              {activeSheet
+                ? (activeSheet.name || activeSheet.title) + "（" + books.length + "）"
+                : "请在左侧选择一个书单"}
+            </div>
+
+            {activeSheet && (
+              <button
+                onClick={openCreateBook}
+                className="text-xs text-pink-500 hover:underline"
+              >
+                添加书籍
+              </button>
+            )}
+          </div>
+
+          {!activeSheet && (
+            <EmptyState hint="左侧选择书单后，这里显示该书单中的书" />
+          )}
+
+          {activeSheet && books.length === 0 && (
+            <EmptyState hint="这个书单还没有书，点击右上角“添加书籍”试试" />
+          )}
+
+          {activeSheet && books.length > 0 && (
+            <div className="divide-y divide-[#F1E6EB] rounded-2xl border border-[#F1E6EB] bg-white/70">
+              {books.map((b) => (
+                <BookListRow
                   key={b.id}
-                  className="group flex gap-3 p-4 border rounded-2xl"
-                  style={{ borderColor: THEME.border }}
-                >
-                  <div className="w-20 h-28 rounded-lg overflow-hidden bg-gray-100 flex items-center justify-center text-gray-400 flex-shrink-0">
-                    {b.coverUrl ? (
-                      <img
-                        src={b.coverUrl}
-                        alt="cover"
-                        className="w-full h-full object-cover"
-                      />
-                    ) : (
-                      <span className="text-sm">{b.title?.[0]}</span>
-                    )}
-                  </div>
-                  <div className="flex-1 flex flex-col">
-                    <div className="font-medium truncate">{b.title}</div>
-                    {b.author && (
-                      <div className="text-xs text-gray-600 truncate">
-                        {b.author}
-                      </div>
-                    )}
-                    <div className="text-[11px] text-gray-500">
-                      {b.orientation} / {b.category}
-                    </div>
-                    {b.rating != null && (
-                      <div className="text-[11px] text-gray-500">
-                        评分: {b.rating}
-                      </div>
-                    )}
-                    {b.review && (
-                      <div className="text-xs text-gray-600 mt-1 line-clamp-2">
-                        {b.review}
-                      </div>
-                    )}
-                    <div className="mt-auto flex gap-2 opacity-0 group-hover:opacity-100 text-[11px] pt-2">
-                      <button
-                        onClick={() => handleEditBook(b)}
-                        className="text-blue-500"
-                      >
-                        编辑
-                      </button>
-                      <button
-                        onClick={() => removeBookFromSheet(activeSheet.id, b.id)}
-                        className="text-red-500"
-                      >
-                        删除
-                      </button>
-                    </div>
-                  </div>
-                </div>
+                  book={b}
+                  onEdit={() => openEditBook(b)}
+                  onDelete={() => deleteBook(b)}
+                />
               ))}
             </div>
           )}
-        </>
-      ) : (
-        <div className="text-sm text-gray-500">请选择书单</div>
-      )}
+        </section>
+      </div>
 
+      {/* ===== 表单弹层：沿用原逻辑，不删除功能 ===== */}
       <BottomSheetForm
         mode="list"
         open={listFormOpen}
@@ -213,7 +211,17 @@ export default function BookSheetPanel() {
         onSubmit={submitBook}
         initialValues={editingBook || {}}
       />
+
+      {/* ✅ 删除书单确认弹窗 */}
+      <ConfirmModal
+        open={confirmOpen}
+        title="删除书单"
+        content={`确定删除「${
+          pendingDeleteSheet?.name || pendingDeleteSheet?.title || ""
+        }」书单吗？此操作将删除书单下所有书籍。`}
+        onCancel={handleCancelDeleteSheet}
+        onConfirm={handleConfirmDeleteSheet}
+      />
     </>
   );
 }
-
