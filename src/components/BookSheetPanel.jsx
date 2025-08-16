@@ -5,6 +5,7 @@ import { THEME } from "../lib/theme";
 import { classNames, formatDate } from "../lib/utils";
 import BottomSheetForm from "./modals/BottomSheetForm";
 import ConfirmModal from "./modals/ConfirmModal"; // ✅ 新增：删除书单前确认
+import MoveBookModal from "./modals/MoveBookModal";
 
 // 纯UI组件
 import SidebarList from "./ui/SidebarList";
@@ -31,6 +32,7 @@ export default function BookSheetPanel() {
     addBookToSheet,
     updateBookInSheet,
     removeBookFromSheet,
+    moveBookToSheet,
   } = useAppStore();
 
   // 当前激活书单
@@ -59,6 +61,8 @@ export default function BookSheetPanel() {
   // ===== 弹层状态（书籍） =====
   const [bookFormOpen, setBookFormOpen] = useState(false);
   const [editingBook, setEditingBook] = useState(null);
+  const [moveModalOpen, setMoveModalOpen] = useState(false);
+  const [movingBook, setMovingBook] = useState(null);
 
   // ===== 书单：新增 / 重命名 =====
   const openCreateSheet = () => {
@@ -119,6 +123,31 @@ export default function BookSheetPanel() {
   const deleteBook = async (book) => {
     if (!activeSheetId) return;
     await removeBookFromSheet(activeSheetId, book.id);
+  };
+
+  const openMoveBook = (book) => {
+    setMovingBook(book);
+    setMoveModalOpen(true);
+  };
+
+  const handleMoveBook = async (toId) => {
+    if (!activeSheetId || !movingBook) return;
+    try {
+      await moveBookToSheet(activeSheetId, movingBook, toId);
+      const target = sheets.find((s) => s.id === toId);
+      if (target) alert(`已转移到${target.name}`);
+    } catch (e) {
+      const status = e?.response?.status || e?.status;
+      let msg = "转移失败";
+      if (status === 403) msg = "无权限操作";
+      else if (status === 409) msg = "目标书单已存在该书籍";
+      else if (status === 404) msg = "资源不存在";
+      else if (status === 400) msg = "参数错误";
+      alert(msg);
+    } finally {
+      setMoveModalOpen(false);
+      setMovingBook(null);
+    }
   };
 
   return (
@@ -189,6 +218,7 @@ export default function BookSheetPanel() {
                   book={b}
                   onEdit={() => openEditBook(b)}
                   onDelete={() => deleteBook(b)}
+                  onMove={() => openMoveBook(b)}
                 />
               ))}
             </div>
@@ -210,6 +240,13 @@ export default function BookSheetPanel() {
         onClose={() => setBookFormOpen(false)}
         onSubmit={submitBook}
         initialValues={editingBook || {}}
+      />
+
+      <MoveBookModal
+        open={moveModalOpen}
+        sheets={sheets.filter((s) => s.id !== activeSheetId)}
+        onCancel={() => setMoveModalOpen(false)}
+        onConfirm={handleMoveBook}
       />
 
       {/* ✅ 删除书单确认弹窗 */}

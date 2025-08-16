@@ -16,7 +16,6 @@ export interface BookSummary {
   orientation?: string;
   category?: string;
   blurb?: string;
-  coverUrl?: string;
   tags?: string[];
   likes?: number;
   bookmarks?: number;
@@ -91,7 +90,6 @@ export const bookApi = {
     blurb?: string;
     summary?: string;
     tags?: string[];
-    coverUrl?: string;
     recommenderId?: number;
   }) => http.post<BookSummary>('/api/books', payload),
 
@@ -193,6 +191,11 @@ export const sheetApi = {
   ) => http.patch<SheetBook>(`/api/sheets/${sheetId}/books/${bookId}`, payload),
   removeBook: (sheetId: number, bookId: number) =>
     http.delete<void>(`/api/sheets/${sheetId}/books/${bookId}`),
+  moveBook: (fromId: number, bookId: number, toId: number) =>
+    http.post<{ moved: boolean; fromListId: number; toListId: number; bookId: number }>(
+      `/api/sheets/${fromId}/books/${bookId}/move`,
+      { toListId: toId },
+    ),
 };
 
 // --------------- Tags --------------------

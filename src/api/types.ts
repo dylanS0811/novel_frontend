@@ -15,7 +15,6 @@ export interface Book {
   blurb?: string;
   summary?: string;
   tags: string[];
-  coverUrl?: string;
   likes: number;
   bookmarks: number;
   comments: number;
@@ -64,7 +63,6 @@ export interface BookCreateReq {
   blurb?: string;
   summary?: string;
   tags?: string[];
-  coverUrl?: string;
   recommenderId?: number;
 }
 export type BookUpdateReq = Partial<Omit<BookCreateReq, 'recommenderId'>>;

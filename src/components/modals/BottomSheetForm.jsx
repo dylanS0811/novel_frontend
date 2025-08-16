@@ -32,6 +32,7 @@ export default function BottomSheetForm({
         if (saved) data = JSON.parse(saved);
       } catch {}
     }
+    const { cover, coverUrl, ...rest } = data;
     setForm({
       name: "",
       intro: "",
@@ -44,7 +45,7 @@ export default function BottomSheetForm({
       review: "",
       summary: "",
       tags: "",
-      ...data,
+      ...rest,
     });
     setErrors({});
   }, [open, storageKey, initialValues]);
@@ -77,7 +78,7 @@ export default function BottomSheetForm({
 
   const handleSubmit = () => {
     if (!validate()) return;
-    const payload = { ...form };
+    const { cover, coverUrl, ...payload } = form;
     onSubmit(payload);
     try {
       localStorage.removeItem(storageKey);
@@ -254,16 +255,6 @@ export default function BottomSheetForm({
                       onChange={handleChange("tags")}
                       className="w-full border rounded-xl px-3 py-2"
                       style={{ borderColor: THEME.border }}
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm mb-1">封面</label>
-                    <input
-                      type="file"
-                      onChange={(e) =>
-                        setForm((f) => ({ ...f, cover: e.target.files?.[0] || null }))
-                      }
-                      style={{ display: "block" }}
                     />
                   </div>
                 </div>
