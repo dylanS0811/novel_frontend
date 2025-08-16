@@ -3,8 +3,7 @@ import React, { useState } from "react";
 import { useAppStore } from "../store/AppStore";
 import { THEME } from "../lib/theme";
 import { classNames, formatDate } from "../lib/utils";
-import SheetDrawer from "./modals/SheetDrawer";
-import SheetBookDrawer from "./modals/SheetBookDrawer";
+import BottomSheetForm from "./modals/BottomSheetForm";
 
 export default function BookSheetPanel() {
   const {
@@ -22,43 +21,44 @@ export default function BookSheetPanel() {
 
   const activeSheet = sheets.find((s) => s.id === activeSheetId);
 
-  const [sheetDrawerOpen, setSheetDrawerOpen] = useState(false);
-  const [editingSheet, setEditingSheet] = useState(null);
-  const [bookDrawerOpen, setBookDrawerOpen] = useState(false);
-  const [editingBook, setEditingBook] = useState(null);
+    const [listFormOpen, setListFormOpen] = useState(false);
+    const [editingSheet, setEditingSheet] = useState(null);
+    const [bookFormOpen, setBookFormOpen] = useState(false);
+    const [editingBook, setEditingBook] = useState(null);
 
   const handleAddSheet = () => {
     setEditingSheet(null);
-    setSheetDrawerOpen(true);
+      setListFormOpen(true);
   };
 
   const handleRenameSheet = (id, name) => {
     setEditingSheet({ id, name });
-    setSheetDrawerOpen(true);
+      setListFormOpen(true);
   };
 
-  const submitSheet = async (name) => {
-    if (editingSheet) await renameSheet(editingSheet.id, name);
-    else await addSheet(name);
-    setSheetDrawerOpen(false);
-  };
+    const submitSheet = async (payload) => {
+      const name = payload?.name || "";
+      if (editingSheet) await renameSheet(editingSheet.id, name);
+      else await addSheet(name);
+      setListFormOpen(false);
+    };
 
   const handleAddBook = () => {
     if (!activeSheet) return;
     setEditingBook(null);
-    setBookDrawerOpen(true);
+      setBookFormOpen(true);
   };
 
   const handleEditBook = (b) => {
     setEditingBook(b);
-    setBookDrawerOpen(true);
+      setBookFormOpen(true);
   };
 
   const submitBook = async (payload) => {
     if (!activeSheet) return;
     if (editingBook) await updateBookInSheet(activeSheet.id, editingBook.id, payload);
     else await addBookToSheet(activeSheet.id, payload);
-    setBookDrawerOpen(false);
+      setBookFormOpen(false);
   };
 
   return (
@@ -174,19 +174,21 @@ export default function BookSheetPanel() {
         )}
       </div>
       </div>
-      <SheetDrawer
-        open={sheetDrawerOpen}
-        onClose={() => setSheetDrawerOpen(false)}
-        defaultValue={editingSheet || {}}
-        onSubmit={submitSheet}
-      />
-      <SheetBookDrawer
-        open={bookDrawerOpen}
-        onClose={() => setBookDrawerOpen(false)}
-        defaultValue={editingBook || {}}
-        onSubmit={submitBook}
-      />
-    </>
-  );
-}
+        <BottomSheetForm
+          mode="list"
+          open={listFormOpen}
+          onClose={() => setListFormOpen(false)}
+          onSubmit={submitSheet}
+          initialValues={editingSheet || {}}
+        />
+        <BottomSheetForm
+          mode="book"
+          open={bookFormOpen}
+          onClose={() => setBookFormOpen(false)}
+          onSubmit={submitBook}
+          initialValues={editingBook || {}}
+        />
+      </>
+    );
+  }
 
