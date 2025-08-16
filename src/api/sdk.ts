@@ -32,6 +32,10 @@ export interface CommentItem {
   userAvatar?: string;
   text: string;
   createdAt: string | number;
+  likes?: number;
+  liked?: boolean;
+  parentId?: number | null;
+  replies?: CommentItem[];
 }
 
 // --------------- Auth --------------------

@@ -31,6 +31,7 @@ function Shell() {
     // 这两个之前没取，导致评论功能没线连上
     commentsMap, // ← 从 store 取评论列表 Map
     addComment, // ← 从 store 取“发表评论”的方法（已对接后端）
+    toggleCommentLike,
     items,
     setItems,
     nick,
@@ -79,8 +80,8 @@ function Shell() {
   const commentList = currentBookId ? commentsMap[currentBookId] || [] : [];
 
   // ✅ 关键修复：发表评论后，除更新本地 commentsMap 外，失效刷新首页/榜单，让评论数立刻 +1
-  const handleAddComment = async (text) => {
-    await addComment(text); // 调后端并更新 commentsMap
+  const handleAddComment = async (text, parentId) => {
+    await addComment(text, parentId); // 调后端并更新 commentsMap
     qc.invalidateQueries({ queryKey: ["books"] });
     qc.invalidateQueries({ queryKey: ["leaderboard"] });
   };
@@ -128,6 +129,7 @@ function Shell() {
         item={commentsOpen.item}
         list={commentList}
         onAdd={handleAddComment}
+        onLike={toggleCommentLike}
       />
 
       {/* 登录/注册（挂载根部） */}
