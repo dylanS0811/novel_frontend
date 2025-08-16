@@ -7,6 +7,7 @@ import { Edit3 } from "lucide-react";
 import { THEME } from "../lib/theme";
 import { classNames } from "../lib/utils";
 import NovelCard from "../components/NovelCard";
+import BookSheetPanel from "../components/BookSheetPanel";
 import { useAppStore } from "../store/AppStore";
 import { meApi } from "../api/sdk";
 
@@ -96,10 +97,6 @@ export function BookshelfSection() {
 
   const favorites = items.filter((i) => savedIds.has(i.id));
   const myRecs = items.filter((i) => i?.recommender?.name === nick);
-  const sheets = [
-    { name: "我的躺赢甜文", count: 12, updated: "今天" },
-    { name: "破案爽感清单", count: 8, updated: "2天前" },
-  ];
 
   const list = tab === "fav" ? favorites : myRecs;
 
@@ -139,17 +136,7 @@ export function BookshelfSection() {
       </div>
 
       {tab === "sheet" ? (
-        <div className="p-4 rounded-2xl border bg-white" style={{ borderColor: THEME.border }}>
-          <div className="font-semibold mb-2">个人书单（{sheets.length}）</div>
-          <ul className="text-sm space-y-1">
-            {sheets.map((s, i) => (
-              <li key={i} className="flex items-center justify-between">
-                <span>· {s.name}（{s.count}本）</span>
-                <span className="text-gray-400">{s.updated}</span>
-              </li>
-            ))}
-          </ul>
-        </div>
+        <BookSheetPanel />
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {list.map((item) => (
