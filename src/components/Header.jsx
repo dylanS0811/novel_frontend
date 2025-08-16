@@ -121,7 +121,7 @@ export default function Header(props) {
               value={q}
               onChange={(e) => setQ(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && triggerSearch()}
-              placeholder="搜索 书名/作者/标签（demo）"
+              placeholder="搜索 书名/作者/标签"
               className="w-56 outline-none bg-transparent"
             />
             <button

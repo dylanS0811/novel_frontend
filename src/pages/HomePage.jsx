@@ -184,7 +184,7 @@ export default function HomePage() {
 
       <div className="text-center text-xs text-gray-500 py-8">
         <span style={{ color: THEME.orchid }}>
-          小贴士：点击左上角“粮仓 Novel Grain”会回首页并清空筛选，默认选中新粮。
+          小贴士：点击左上角“LOGO”会回首页并清空筛选，默认选中新粮。
         </span>
       </div>
     </>
