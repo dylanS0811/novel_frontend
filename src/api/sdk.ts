@@ -55,6 +55,10 @@ export const meApi = {
   get: () => http.get<User>('/api/me'),
   patch: (payload: { nickname?: string; avatar?: string }) =>
     http.patch<User>('/api/me', payload),
+  checkNickname: (nickname: string) =>
+    http.get<{ exists: boolean }>('/api/users/check-nickname', {
+      params: { nickname },
+    }),
 };
 
 // --------------- Books -------------------
@@ -90,6 +94,9 @@ export const bookApi = {
     coverUrl?: string;
     recommenderId?: number;
   }) => http.post<BookSummary>('/api/books', payload),
+
+  checkExist: (payload: { title: string; author?: string }) =>
+    http.get<{ exists: boolean }>('/api/books/check', { params: payload }),
 
   patch: (id: number, payload: Partial<Omit<BookSummary, 'id'>>) =>
     http.patch<BookSummary>(`/api/books/${id}`, payload),

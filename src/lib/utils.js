@@ -9,13 +9,13 @@ export const classNames = (...arr) => arr.filter(Boolean).join(" ");
 
 /**
  * 热度算法（统一口径）
- * 权重：点赞×1、收藏×2、评论×3
+ * 权重：评论×1、收藏×2、点赞×3
  */
 export const heatScore = (item) => {
   const likes = Number(item?.likes || 0);
   const bookmarks = Number(item?.bookmarks || 0);
   const comments = Number(item?.comments || 0);
-  return likes * 1 + bookmarks * 2 + comments * 3;
+  return comments * 1 + bookmarks * 2 + likes * 3;
 };
 
 /** 安全数组：不是数组就返回空数组，避免 .map 报错 */
