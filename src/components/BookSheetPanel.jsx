@@ -1,8 +1,10 @@
 // src/components/BookSheetPanel.jsx
-import React from "react";
+import React, { useState } from "react";
 import { useAppStore } from "../store/AppStore";
 import { THEME } from "../lib/theme";
 import { classNames, formatDate } from "../lib/utils";
+import SheetDrawer from "./modals/SheetDrawer";
+import SheetBookDrawer from "./modals/SheetBookDrawer";
 
 export default function BookSheetPanel() {
   const {
@@ -20,64 +22,52 @@ export default function BookSheetPanel() {
 
   const activeSheet = sheets.find((s) => s.id === activeSheetId);
 
-  const handleAddSheet = async () => {
-    const name = prompt("输入书单名");
-    if (name) await addSheet(name);
+  const [sheetDrawerOpen, setSheetDrawerOpen] = useState(false);
+  const [editingSheet, setEditingSheet] = useState(null);
+  const [bookDrawerOpen, setBookDrawerOpen] = useState(false);
+  const [editingBook, setEditingBook] = useState(null);
+
+  const handleAddSheet = () => {
+    setEditingSheet(null);
+    setSheetDrawerOpen(true);
   };
 
-  const handleRenameSheet = async (id, name) => {
-    const v = prompt("修改书单名", name);
-    if (v && v !== name) await renameSheet(id, v);
+  const handleRenameSheet = (id, name) => {
+    setEditingSheet({ id, name });
+    setSheetDrawerOpen(true);
   };
 
-  const handleAddBook = async () => {
+  const submitSheet = async (name) => {
+    if (editingSheet) await renameSheet(editingSheet.id, name);
+    else await addSheet(name);
+    setSheetDrawerOpen(false);
+  };
+
+  const handleAddBook = () => {
     if (!activeSheet) return;
-    const title = prompt("书名");
-    if (!title) return;
-    const author = prompt("作者") || "";
-    const orientation = prompt("性向") || "";
-    const category = prompt("类型") || "";
-    const ratingStr = prompt("评分（1-10）") || "";
-    const rating = ratingStr ? Number(ratingStr) : undefined;
-    const review = prompt("评价") || "";
-    await addBookToSheet(activeSheet.id, {
-      title,
-      author,
-      orientation,
-      category,
-      rating,
-      review,
-    });
+    setEditingBook(null);
+    setBookDrawerOpen(true);
   };
 
-  const handleEditBook = async (b) => {
-    const title = prompt("书名", b.title);
-    if (!title) return;
-    const author = prompt("作者", b.author || "") || "";
-    const orientation = prompt("性向", b.orientation || "") || "";
-    const category = prompt("类型", b.category || "") || "";
-    const ratingStr = prompt(
-      "评分（1-10）",
-      b.rating != null ? String(b.rating) : ""
-    ) || "";
-    const rating = ratingStr ? Number(ratingStr) : undefined;
-    const review = prompt("评价", b.review || "") || "";
-    await updateBookInSheet(activeSheet.id, b.id, {
-      title,
-      author,
-      orientation,
-      category,
-      rating,
-      review,
-    });
+  const handleEditBook = (b) => {
+    setEditingBook(b);
+    setBookDrawerOpen(true);
+  };
+
+  const submitBook = async (payload) => {
+    if (!activeSheet) return;
+    if (editingBook) await updateBookInSheet(activeSheet.id, editingBook.id, payload);
+    else await addBookToSheet(activeSheet.id, payload);
+    setBookDrawerOpen(false);
   };
 
   return (
-    <div className="flex">
-      <div
-        className="w-48 flex-shrink-0 pr-2 border-r"
-        style={{ borderColor: THEME.border }}
-      >
+    <>
+      <div className="flex">
+        <div
+          className="w-48 flex-shrink-0 pr-2 border-r"
+          style={{ borderColor: THEME.border }}
+        >
         <div className="flex items-center justify-between mb-2">
           <span className="font-semibold">书单</span>
           <button onClick={handleAddSheet} className="text-xs text-blue-500">
@@ -183,7 +173,20 @@ export default function BookSheetPanel() {
           <div className="text-sm text-gray-500">请选择书单</div>
         )}
       </div>
-    </div>
+      </div>
+      <SheetDrawer
+        open={sheetDrawerOpen}
+        onClose={() => setSheetDrawerOpen(false)}
+        defaultValue={editingSheet || {}}
+        onSubmit={submitSheet}
+      />
+      <SheetBookDrawer
+        open={bookDrawerOpen}
+        onClose={() => setBookDrawerOpen(false)}
+        defaultValue={editingBook || {}}
+        onSubmit={submitBook}
+      />
+    </>
   );
 }
 
