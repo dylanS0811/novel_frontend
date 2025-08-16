@@ -103,15 +103,10 @@ export function AppProvider({ children }) {
   const [sheetBooks, setSheetBooks] = useState([]);
   const [activeSheetId, setActiveSheetId] = useState(null);
 
-  // 发送短信验证码
-  const sendPhoneCode = async (phone) => {
-    await authApi.sendPhoneCode({ phone });
-  };
-
-  // 微信登录
-  const loginWithWeChat = async (wechatCode = "example_code") => {
+  // 用户名/邮箱/手机号 + 密码 登录
+  const loginWithCredentials = async (handle, password) => {
     try {
-      const res = await authApi.wechatLogin({ wechatCode });
+      const res = await authApi.login({ handle, password });
       const d = res?.data || res || {};
       if (d.token) localStorage.setItem("token", d.token);
       const u = d.user || {};
@@ -121,33 +116,23 @@ export function AppProvider({ children }) {
         avatar: u.avatar ?? "https://i.pravatar.cc/80?img=15",
       };
       setUser(mapped);
+      localStorage.setItem("user", JSON.stringify(mapped));
       if (mapped.nick) setNick(mapped.nick);
       if (mapped.avatar) setAvatar(mapped.avatar);
       setAuthOpen(false);
     } catch (e) {
-      console.error("wechat login failed", e);
+      console.error("credential login failed", e);
+      throw e;
     }
   };
 
-  // 手机号登录
-  const loginWithPhone = async (phone = "13800000000", code = "1234") => {
+  // 注册账号
+  const registerAccount = async (handle, password) => {
     try {
-      const res = await authApi.phoneLogin({ phone, code });
-      const d = res?.data || res || {};
-      if (d.token) localStorage.setItem("token", d.token);
-      const u = d.user || {};
-      const mapped = {
-        id: u.id ?? 1,
-        nick: u.nick ?? nick ?? "新用户",
-        avatar: u.avatar ?? "https://i.pravatar.cc/80?img=11",
-        phone: u.phone ?? phone,
-      };
-      setUser(mapped);
-      if (mapped.nick) setNick(mapped.nick);
-      if (mapped.avatar) setAvatar(mapped.avatar);
-      setAuthOpen(false);
+      await authApi.register({ handle, password });
     } catch (e) {
-      console.error("phone login failed", e);
+      console.error("register failed", e);
+      throw e;
     }
   };
 
@@ -156,6 +141,7 @@ export function AppProvider({ children }) {
     setUser(null);
     setLikedIds(new Set());
     setSavedIds(new Set());
+    localStorage.removeItem("user");
   };
 
   // ===== 个人书单 =====
@@ -231,7 +217,10 @@ export function AppProvider({ children }) {
   }, [sheetBooks, user?.id, activeSheetId]);
 
   const addSheet = async (name) => {
-    if (!user?.id) return;
+    if (!user?.id) {
+      setAuthOpen(true);
+      return;
+    }
     try {
       const res = await sheetApi.create(user.id, { name });
       const s = res?.data || res;
@@ -265,6 +254,10 @@ export function AppProvider({ children }) {
   };
 
   const addBookToSheet = async (sheetId, payload) => {
+    if (!user?.id) {
+      setAuthOpen(true);
+      return;
+    }
     try {
       const res = await sheetApi.addBook(sheetId, payload);
       const b = res?.data || res;
@@ -275,6 +268,10 @@ export function AppProvider({ children }) {
   };
 
   const updateBookInSheet = async (sheetId, bookId, payload) => {
+    if (!user?.id) {
+      setAuthOpen(true);
+      return;
+    }
     try {
       const res = await sheetApi.updateBook(sheetId, bookId, payload);
       const b = res?.data || res;
@@ -286,6 +283,10 @@ export function AppProvider({ children }) {
   };
 
   const removeBookFromSheet = async (sheetId, bookId) => {
+    if (!user?.id) {
+      setAuthOpen(true);
+      return;
+    }
     try {
       await sheetApi.removeBook(sheetId, bookId);
       if (sheetId === activeSheetId)
@@ -296,6 +297,10 @@ export function AppProvider({ children }) {
   };
 
   const moveBookToSheet = async (fromId, book, toId) => {
+    if (!user?.id) {
+      setAuthOpen(true);
+      throw new Error("not logged in");
+    }
     try {
       await sheetApi.moveBook(fromId, book.id, toId);
       if (fromId === activeSheetId)
@@ -351,7 +356,7 @@ export function AppProvider({ children }) {
 
   /* ================== 点赞 / 收藏 ================== */
 
-  // 点赞/取消点赞（未登录：本地集合；已登录：打后端；带防重锁）
+  // 点赞/取消点赞（未登录：弹登录；已登录：打后端；带防重锁）
   const toggleLike = async (id) => {
     if (likeInflight.has(id)) return;
     likeInflight.add(id);
@@ -359,12 +364,7 @@ export function AppProvider({ children }) {
     const liked = likedIds.has(Number(id)) || likedIds.has(String(id));
     try {
       if (!user?.id) {
-        setLikedIds((prev) => {
-          const n = new Set(prev);
-          if (liked) { n.delete(Number(id)); n.delete(String(id)); }
-          else { n.add(Number(id)); }
-          return n;
-        });
+        setAuthOpen(true);
         return;
       }
       if (!liked) await bookApi.like(Number(id), user.id);
@@ -382,7 +382,7 @@ export function AppProvider({ children }) {
     }
   };
 
-  // 收藏/取消收藏（未登录：本地集合；已登录：打后端；带防重锁）
+  // 收藏/取消收藏（未登录：弹登录；已登录：打后端；带防重锁）
   const toggleSave = async (id) => {
     if (bookmarkInflight.has(id)) return;
     bookmarkInflight.add(id);
@@ -390,12 +390,7 @@ export function AppProvider({ children }) {
     const bookmarked = savedIds.has(Number(id)) || savedIds.has(String(id));
     try {
       if (!user?.id) {
-        setSavedIds((prev) => {
-          const n = new Set(prev);
-          if (bookmarked) { n.delete(Number(id)); n.delete(String(id)); }
-          else { n.add(Number(id)); }
-          return n;
-        });
+        setAuthOpen(true);
         return;
       }
       if (!bookmarked) await bookApi.bookmark(Number(id), user.id);
@@ -417,6 +412,10 @@ export function AppProvider({ children }) {
   const addComment = async (text, parentId) => {
     const bookId = commentsOpen?.item?.id;
     if (!bookId) return;
+    if (!user?.id) {
+      setAuthOpen(true);
+      throw new Error("not logged in");
+    }
     if (parentId) {
       const depth = findCommentDepth(commentsMap[Number(bookId)] || [], parentId);
       if (depth >= 2) {
@@ -425,7 +424,7 @@ export function AppProvider({ children }) {
       }
     }
     try {
-      const payload = { text, userId: user?.id ?? 1 };
+      const payload = { text, userId: user.id };
       if (parentId) payload.parentId = parentId;
       const c = await bookApi.addComment(Number(bookId), payload);
       const created =
@@ -484,11 +483,15 @@ export function AppProvider({ children }) {
     };
     const target = find(list);
     if (!target) return;
+    if (!user?.id) {
+      setAuthOpen(true);
+      return;
+    }
     try {
       const liked = target.liked;
       const res = liked
-        ? await bookApi.unlikeComment(commentId, user?.id ?? 1)
-        : await bookApi.likeComment(commentId, user?.id ?? 1);
+        ? await bookApi.unlikeComment(commentId, user.id)
+        : await bookApi.likeComment(commentId, user.id);
       const updated = res?.data || res || {};
       setCommentsMap((m) => {
         const replace = (arr) =>
@@ -538,6 +541,15 @@ export function AppProvider({ children }) {
   useEffect(() => {
     const token = localStorage.getItem("token");
     if (!token) return;
+    const cached = localStorage.getItem("user");
+    if (cached) {
+      try {
+        const u = JSON.parse(cached);
+        if (u.nick) setNick(u.nick);
+        if (u.avatar) setAvatar(u.avatar);
+        setUser(u);
+      } catch {}
+    }
     let mounted = true;
     (async () => {
       try {
@@ -562,6 +574,20 @@ export function AppProvider({ children }) {
       mounted = false;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // 监听全局未授权事件：清空本地登录状态并弹出登录框
+  useEffect(() => {
+    const onLogout = () => {
+      setUser(null);
+      localStorage.removeItem("token");
+      localStorage.removeItem("user");
+      setLikedIds(new Set());
+      setSavedIds(new Set());
+      setAuthOpen(true);
+    };
+    window.addEventListener("auth:logout", onLogout);
+    return () => window.removeEventListener("auth:logout", onLogout);
   }, []);
 
   // 筛选/分页变化时刷新
@@ -610,7 +636,7 @@ export function AppProvider({ children }) {
           Number(bookId),
           1,
           30,
-          user?.id ?? 1
+          user?.id
         );
         const data = res?.data || res || {};
         const list = data.list ?? data.items ?? [];
@@ -747,9 +773,8 @@ export function AppProvider({ children }) {
       setUser,
       authOpen,
       setAuthOpen,
-      sendPhoneCode,
-      loginWithWeChat,
-      loginWithPhone,
+      loginWithCredentials,
+      registerAccount,
       logout,
 
       // 个人书单

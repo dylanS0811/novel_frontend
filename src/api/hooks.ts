@@ -16,25 +16,16 @@ import {
 
 /* ========== Auth ========== */
 
-// 1) 发送短信验证码
-export const useSendPhoneCode = () =>
+export const useAuthRegister = () =>
   useMutation({
-    mutationFn: (payload: Parameters<typeof authApi.sendPhoneCode>[0]) =>
-      authApi.sendPhoneCode(payload),
+    mutationFn: (payload: Parameters<typeof authApi.register>[0]) =>
+      authApi.register(payload),
   });
 
-// 2) 微信登录（是否写入 token 由调用方决定）
-export const useWechatLogin = () =>
+export const useAuthLogin = () =>
   useMutation({
-    mutationFn: (payload: Parameters<typeof authApi.wechatLogin>[0]) =>
-      authApi.wechatLogin(payload),
-  });
-
-// 3) 手机验证码登录（是否写入 token 由调用方决定）
-export const usePhoneLogin = () =>
-  useMutation({
-    mutationFn: (payload: Parameters<typeof authApi.phoneLogin>[0]) =>
-      authApi.phoneLogin(payload),
+    mutationFn: (payload: Parameters<typeof authApi.login>[0]) =>
+      authApi.login(payload),
   });
 
 /* ========== Me ========== */
