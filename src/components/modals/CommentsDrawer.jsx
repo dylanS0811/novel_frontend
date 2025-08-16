@@ -66,15 +66,17 @@ export default function CommentsDrawer({ open, onClose, item, list, onAdd, onLik
               <Heart className="w-3 h-3" fill={c.liked ? "currentColor" : "none"} />
               {c.likes || 0}
             </button>
-            <button
-              onClick={() => {
-                setReplyingId(c.id);
-                setReplyText("");
-              }}
-              className="hover:text-pink-500"
-            >
-              回复
-            </button>
+            {depth < 2 && (
+              <button
+                onClick={() => {
+                  setReplyingId(c.id);
+                  setReplyText("");
+                }}
+                className="hover:text-pink-500"
+              >
+                回复
+              </button>
+            )}
             {hasReplies && depth === 0 && (
               <button
                 onClick={() => setOpenReplies((o) => ({ ...o, [c.id]: !o[c.id] }))}
