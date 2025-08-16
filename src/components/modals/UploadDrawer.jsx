@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Upload, PlusCircle, X } from "lucide-react";
 import { ORIENTATIONS, CATEGORIES, TAGS } from "../../lib/constants";
 import { THEME } from "../../lib/theme";
-import { tagApi } from "../../api/sdk";
+import { tagApi, bookApi } from "../../api/sdk";
 import { useAppStore } from "../../store/AppStore";
 import { useCreateBook } from "../../api/hooks";
 import { useQueryClient } from "@tanstack/react-query";
@@ -211,6 +211,18 @@ export default function UploadDrawer({ open, onClose, onSubmit }) {
       return;
     }
     if (submitting) return;
+
+    // 书名+作者不得重复
+    try {
+      const resp = await bookApi.checkExist({ title, author });
+      const exists = resp?.data?.exists ?? resp?.exists;
+      if (exists) {
+        setToast({ msg: "已存在同名书籍", type: "error" });
+        return;
+      }
+    } catch (e) {
+      console.warn("check book duplicate failed", e);
+    }
 
     const payload = { title, author, tags, raw, orientation, category, blurb, summary };
 

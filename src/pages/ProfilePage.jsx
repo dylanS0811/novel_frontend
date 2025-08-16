@@ -183,9 +183,22 @@ export default function ProfilePage() {
 
   const saveNick = async () => {
     try {
-      const r = await meApi.patch({ nickname: val, avatar });
+      const v = val.trim();
+      if (!v) {
+        setToast("请输入昵称");
+        return;
+      }
+
+      const ck = await meApi.checkNickname(v);
+      const exists = ck?.data?.exists ?? ck?.exists;
+      if (exists) {
+        setToast("昵称已被占用");
+        return;
+      }
+
+      const r = await meApi.patch({ nickname: v, avatar });
       const d = r?.data ?? r ?? {};
-      setNick(d.nick ?? val);
+      setNick(d.nick ?? v);
       setToast("保存成功");
     } catch (e) {
       console.error("update nickname failed", e);

@@ -143,7 +143,7 @@ export default function Leaderboard({ items = [], onOpenUser, fetcher }) {
         </div>
 
         <div className="text-[11px] text-gray-400 mt-3 px-2">
-          {tab === "champion" ? "历史累计热度" : "近30天热度"} = 点赞×1 + 收藏×2 + 评论×3
+          {tab === "champion" ? "历史累计热度" : "近30天热度"} = 评论×1 + 收藏×2 + 点赞×3
         </div>
       </div>
     </div>
