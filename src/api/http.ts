@@ -26,7 +26,13 @@ http.interceptors.response.use(
     }
     return res;
   },
-  (err) => Promise.reject(err)
+  (err) => {
+    if (err?.response?.status === 401) {
+      localStorage.removeItem("token");
+      window.dispatchEvent(new Event("auth:logout"));
+    }
+    return Promise.reject(err);
+  }
 );
 
 export default http;

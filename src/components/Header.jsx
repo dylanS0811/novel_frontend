@@ -137,7 +137,7 @@ export default function Header(props) {
 
           {/* 闪电上传 */}
           <button
-            onClick={onOpenUpload}
+            onClick={() => (store.user ? onOpenUpload() : store.setAuthOpen(true))}
             className="ml-2 hidden md:inline-flex items-center gap-2 px-3 py-2 rounded-full text-white shadow"
             style={{
               background:
@@ -219,7 +219,7 @@ export default function Header(props) {
             className="relative ml-1"
             title="通知中心"
             type="button"
-            onClick={() => store.setNotifyOpen(true)}
+            onClick={() => (store.user ? store.setNotifyOpen(true) : store.setAuthOpen(true))}
           >
             <Bell className="w-6 h-6 text-gray-700" />
             {store.unreadCount > 0 && (

@@ -39,14 +39,10 @@ export interface CommentItem {
 
 // --------------- Auth --------------------
 export const authApi = {
-  // 发送短信验证码
-  sendPhoneCode: (payload: { phone: string }) =>
-    http.post<{ sent: boolean; ttl: number }>('/api/auth/phone/code', payload),
-
-  wechatLogin: (payload: { wechatCode: string }) =>
-    http.post<{ token: string; user: User }>('/api/auth/wechat/login', payload),
-  phoneLogin: (payload: { phone: string; code: string }) =>
-    http.post<{ token: string; user: User }>('/api/auth/phone/login', payload),
+  register: (payload: { handle: string; password: string }) =>
+    http.post<{ ok: boolean }>('/api/auth/register', payload),
+  login: (payload: { handle: string; password: string }) =>
+    http.post<{ token: string; user: User }>('/api/auth/login', payload),
 };
 
 // --------------- Me ----------------------

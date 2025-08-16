@@ -41,6 +41,7 @@ function Shell() {
     notifyOpen,
     setNotifyOpen,
     setPage,
+    user,
   } = useAppStore();
 
   // 发布上传（保持原有本地插卡行为；UploadDrawer 里也已接上后端，二者兼容）
@@ -97,7 +98,7 @@ function Shell() {
       {/* 右下角悬浮 + 按钮：当评论抽屉打开时隐藏，避免遮挡输入框 */}
       {!commentsOpen.open && (
         <button
-          onClick={() => setShowUpload(true)}
+          onClick={() => (user ? setShowUpload(true) : setAuthOpen(true))}
           title="闪电上传"
           className="fixed bottom-6 right-6 rounded-full shadow-lg flex items-center justify-center"
           style={{
