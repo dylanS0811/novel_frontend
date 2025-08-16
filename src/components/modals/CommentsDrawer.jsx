@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { X } from "lucide-react";
 import { THEME } from "../../lib/theme";
+import { formatDate } from "../../lib/utils";
 
 // 评论抽屉
 // 数据来源与新增评论均由父组件通过 props(list / onAdd) 对接后端
@@ -60,19 +61,21 @@ export default function CommentsDrawer({ open, onClose, item, list, onAdd }) {
                 </div>
               )}
               {list.map((c, idx) => (
-                <div key={idx} className="flex items-start gap-2">
+                <div key={c.id || idx} className="flex items-start gap-2">
                   {/* 头像：如果后端没传，显示默认头像 */}
                   <img
-                    src={c.avatar || "/default-avatar.png"}
-                    alt={c.user}
+                    src={c.userAvatar || "/default-avatar.png"}
+                    alt={c.userName}
                     className="w-7 h-7 rounded-full object-cover bg-gray-200"
                   />
                   <div className="flex-1">
                     <div className="text-sm">
                       <span className="font-medium mr-2">
-                        {c.user || "匿名用户"}
+                        {c.userName || "匿名用户"}
                       </span>
-                      <span className="text-gray-400">{c.time}</span>
+                      <span className="text-gray-400">
+                        {formatDate(c.createdAt)}
+                      </span>
                     </div>
                     <div className="text-sm mt-0.5">{c.text}</div>
                   </div>
