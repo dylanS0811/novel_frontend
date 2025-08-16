@@ -21,16 +21,32 @@ import {
 // 新增：对接后端（修正命名：notificationApi）
 import { notificationApi } from "../../api/sdk";
 
+// 通知类型元信息
+const TYPE_META = {
+  like: { label: "点赞", icon: Heart },
+  comment: { label: "评论", icon: MessageCircle },
+  bookmark: { label: "收藏", icon: Bookmark },
+  mention: { label: "提及", icon: AtSign },
+  achievement: { label: "成就", icon: Trophy },
+  system: { label: "系统", icon: Info },
+  reply: { label: "评论", icon: MessageCircle },
+  comment_like: { label: "点赞", icon: Heart },
+};
+
+const BACKEND_TYPE_MAP = {
+  BOOK_LIKED: "like",
+  BOOK_BOOKMARKED: "bookmark",
+  BOOK_COMMENTED: "comment",
+  COMMENT_REPLIED: "reply",
+  COMMENT_LIKED: "comment_like",
+  BOOK_MENTIONED: "mention",
+  SYSTEM: "system",
+  ACHIEVEMENT_UNLOCKED: "achievement",
+};
+
 function ItemIcon({ type }) {
-  if (type === "like" || type === "comment_like")
-    return <Heart className="w-4 h-4" />;
-  if (type === "comment" || type === "reply")
-    return <MessageCircle className="w-4 h-4" />;
-  if (type === "bookmark") return <Bookmark className="w-4 h-4" />;
-  if (type === "mention") return <AtSign className="w-4 h-4" />;
-  if (type === "achievement") return <Trophy className="w-4 h-4" />;
-  if (type === "system") return <Info className="w-4 h-4" />;
-  return <UserPlus className="w-4 h-4" />;
+  const Icon = TYPE_META[type]?.icon || UserPlus;
+  return <Icon className="w-4 h-4" />;
 }
 
 export default function NotificationsDrawer({ open, onClose }) {
@@ -55,7 +71,11 @@ export default function NotificationsDrawer({ open, onClose }) {
       try {
         const userId = user?.id || 1;
         const res = await notificationApi.list({ userId, page: 1, size: 50 });
-        const list = res?.data?.list || [];
+        const list = (res?.data?.list || []).map((n) => ({
+          ...n,
+          type: BACKEND_TYPE_MAP[n.type] || n.type?.toLowerCase(),
+          bookTitle: n.bookTitle || n.title,
+        }));
         clearNotifications();
         list.forEach(addNotification);
       } catch (e) {
@@ -278,7 +298,19 @@ export default function NotificationsDrawer({ open, onClose }) {
                   )}
 
                   <div className="flex-1 text-sm">
-                    <div className="text-gray-800">{renderText(n)}</div>
+                    <div className="flex items-center gap-2">
+                      <span
+                        className="px-1.5 py-0.5 rounded-full border bg-white shadow-sm flex items-center gap-1 text-xs"
+                        style={{ borderColor: THEME.border }}
+                      >
+                        {(() => {
+                          const Icon = TYPE_META[n.type]?.icon;
+                          return Icon ? <Icon className="w-3 h-3" /> : null;
+                        })()}
+                        {TYPE_META[n.type]?.label || n.type}
+                      </span>
+                      <div className="text-gray-800">{renderText(n)}</div>
+                    </div>
                     <div className="text-gray-400 text-xs mt-0.5">
                       {timeAgo(n.createdAt)}
                       {!n.read && (
