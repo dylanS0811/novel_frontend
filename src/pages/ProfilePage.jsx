@@ -1,9 +1,9 @@
 // src/pages/ProfilePage.jsx
-// 个人中心：头像昵称 + 修改昵称 + 书架分栏（收藏 / 我推荐 / 个人书单）
+// 个人中心：头像昵称 + 优雅的昵称编辑卡片 + 书架分栏（收藏 / 我推荐 / 个人书单）
 import React, { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { AnimatePresence, motion } from "framer-motion";
-import { Edit3 } from "lucide-react";
+import { Edit3, Loader2 } from "lucide-react";
 import { THEME } from "../lib/theme";
 import { classNames } from "../lib/utils";
 import NovelCard from "../components/NovelCard";
@@ -161,36 +161,51 @@ export default function ProfilePage() {
   const { nick, setNick, avatar } = useAppStore();
   const [val, setVal] = useState(nick);
   const [toast, setToast] = useState("");
+  const [saving, setSaving] = useState(false);
   const displayAvatar = avatar || "https://i.pravatar.cc/120?img=15";
+
+  // 配置：昵称长度限制
+  const MIN = 2;
+  const MAX = 20;
 
   // 同步输入框到全局 nick（修复刷新后不同步）
   useEffect(() => {
     setVal(nick);
   }, [nick]);
 
+  const trimmed = (val || "").trim();
+  const len = trimmed.length;
+  const invalid = len < MIN || len > MAX;
+  const unchanged = trimmed === (nick || "").trim();
+
   const saveNick = async () => {
+    if (invalid || unchanged || saving) return;
     try {
-      const v = val.trim();
-      if (!v) {
+      setSaving(true);
+
+      // 1) 空校验
+      if (!trimmed) {
         setToast("请输入昵称");
         return;
       }
-
-      const ck = await meApi.checkNickname(v);
+      // 2) 重名校验
+      const ck = await meApi.checkNickname(trimmed);
       const exists = ck?.data?.exists ?? ck?.exists;
       if (exists) {
         setToast("昵称已被占用");
         return;
       }
 
-      const r = await meApi.patch({ nickname: v, avatar });
+      // 3) 保存
+      const r = await meApi.patch({ nickname: trimmed, avatar });
       const d = r?.data ?? r ?? {};
-      setNick(d.nick ?? v);
+      setNick(d.nick ?? trimmed);
       setToast("保存成功");
     } catch (e) {
       console.error("update nickname failed", e);
-      setNick(val);
       setToast("保存失败");
+    } finally {
+      setSaving(false);
     }
   };
 
@@ -207,27 +222,110 @@ export default function ProfilePage() {
         </div>
       </div>
 
-      {/* 修改昵称 */}
-      <div className="mt-6 p-4 rounded-2xl border bg-white" style={{ borderColor: THEME.border }}>
-        <div className="text-sm text-gray-600 mb-2">修改昵称</div>
-        <div className="flex items-center gap-2">
-          <input
-            value={val}
-            onChange={(e) => setVal(e.target.value)}
-            className="flex-1 border rounded-xl px-3 py-2"
-            style={{ borderColor: THEME.border }}
-          />
+      {/* 修改昵称 — 玻璃拟态小卡片 */}
+      <motion.div
+        className="mt-6 p-4 rounded-2xl"
+        style={{
+          // 渐变描边 + 玻璃
+          padding: 1,
+          background:
+            "linear-gradient(135deg, rgba(251,113,133,0.25), rgba(244,114,182,0.25))",
+          boxShadow: "0 18px 42px rgba(248,108,139,0.10)",
+        }}
+        initial={{ opacity: 0, y: 8, scale: 0.98 }}
+        animate={{ opacity: 1, y: 0, scale: 1 }}
+        transition={{ type: "spring", stiffness: 420, damping: 32 }}
+      >
+        <div
+          className="rounded-2xl"
+          style={{
+            background: "rgba(255,255,255,0.82)",
+            border: `1px solid ${THEME.border}`,
+            backdropFilter: "saturate(130%) blur(8px)",
+            WebkitBackdropFilter: "saturate(130%) blur(8px)",
+          }}
+        >
+          {/* 标题行 */}
+          <div className="px-5 pt-4 pb-2 flex items-center justify-between">
+            <div className="text-sm font-semibold text-gray-700">修改昵称</div>
+            <div className="text-[12px] text-gray-400">
+              {MIN}–{MAX} 个字符
+            </div>
+          </div>
+
+          {/* 输入区：缩短宽度、圆角胶囊、带字符计数 */}
+          <div className="px-5 pb-4">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:gap-3">
+              <div className="relative w-full sm:w-auto">
+                <input
+                  value={val}
+                  onChange={(e) => setVal(e.target.value)}
+                  maxLength={MAX + 10} // 软限制，硬提示走 invalid
+                  className={classNames(
+                    "w-full sm:w-[420px] rounded-full px-4 py-2.5 text-[14px] outline-none transition shadow-sm",
+                    "border",
+                    invalid
+                      ? "border-rose-300 focus:border-rose-400"
+                      : "border-[#F1E6EB] focus:border-pink-300"
+                  )}
+                  style={{
+                    background:
+                      "linear-gradient(180deg, #FFFFFF 0%, rgba(255,255,255,0.9) 100%)",
+                  }}
+                  placeholder="输入新的昵称"
+                />
+                {/* 字符计数 */}
+                <div
+                  className={classNames(
+                    "absolute right-3 top-1/2 -translate-y-1/2 text-[12px]",
+                    invalid ? "text-rose-400" : "text-gray-400"
+                  )}
+                >
+                  {len}/{MAX}
+                </div>
+              </div>
+
+              {/* 保存按钮 */}
+              <button
+                onClick={saveNick}
+                disabled={invalid || unchanged || saving}
+                className={classNames(
+                  "mt-3 sm:mt-0 inline-flex items-center justify-center gap-1.5 rounded-full px-4 py-2 text-white text-[14px] disabled:opacity-60 disabled:cursor-not-allowed"
+                )}
+                style={{
+                  background: "linear-gradient(135deg,#F472B6,#FB7185)",
+                  boxShadow: "0 10px 24px rgba(244,114,182,0.25)",
+                  border: "1px solid rgba(255,255,255,0.6)",
+                }}
+                title={invalid ? "昵称长度需在范围内" : unchanged ? "没有修改内容" : "保存"}
+              >
+                {saving ? (
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    保存中…
+                  </>
+                ) : (
+                  <>
+                    <Edit3 className="w-4 h-4" />
+                    保存
+                  </>
+                )}
+              </button>
+            </div>
+
+            {/* 提示/错误文案 */}
+            <div className="mt-2 min-h-[18px] text-[12px]">
+              {invalid ? (
+                <span className="text-rose-500">
+                  昵称需在 {MIN}–{MAX} 个字符内
+                </span>
+              ) : (
+                <span className="text-gray-400">支持中英文、数字与常用符号</span>
+              )}
+            </div>
+          </div>
         </div>
-        <div className="mt-3">
-          <button
-            onClick={saveNick}
-            className="px-3 py-2 rounded-xl text-white"
-            style={{ background: "linear-gradient(135deg,#F472B6,#FB7185)" }}
-          >
-            <Edit3 className="w-4 h-4 inline mr-1" /> 保存
-          </button>
-        </div>
-      </div>
+      </motion.div>
 
       {/* 书架分栏（直接并入个人中心） */}
       <BookshelfSection />

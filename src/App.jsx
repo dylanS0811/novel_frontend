@@ -17,6 +17,7 @@ import NotificationsDrawer from "./components/modals/NotificationsDrawer";
 import { useAppStore } from "./store/AppStore";
 import { Plus } from "lucide-react";
 import { THEME } from "./lib/theme";
+import { ToastHost } from "./components/ui/Toast";
 
 function Shell() {
   const qc = useQueryClient();
@@ -137,6 +138,10 @@ function Shell() {
 
       {/* 通知中心（挂载根部） */}
       <NotificationsDrawer open={notifyOpen} onClose={() => setNotifyOpen(false)} />
+
+      {/* 全局 Toast 宿主（顶部浅色聊天气泡） */}
+      <ToastHost />
+        
     </>
   );
 }

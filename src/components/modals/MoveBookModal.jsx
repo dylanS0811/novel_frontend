@@ -1,15 +1,33 @@
 import React, { useEffect, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { createPortal } from "react-dom";
+import { showToast } from "../ui/Toast";
 
 export default function MoveBookModal({ open, sheets = [], onCancel, onConfirm }) {
   const [selected, setSelected] = useState(null);
+  const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
     if (open) {
       setSelected(sheets[0]?.id ?? null);
+      setSubmitting(false);
     }
   }, [open, sheets]);
+
+  const handleConfirm = async () => {
+    if (!selected || submitting) return;
+    setSubmitting(true);
+    try {
+      await Promise.resolve(onConfirm?.(selected));
+      const toName = sheets.find((s) => s.id === selected)?.name || "目标书单";
+      showToast(`已转移到「${toName}」`);
+      onCancel?.(); // 成功后关闭弹窗
+    } catch (e) {
+      showToast(e?.message || "转移失败，请稍后再试");
+    } finally {
+      setSubmitting(false);
+    }
+  };
 
   const body = (
     <AnimatePresence>
@@ -60,16 +78,17 @@ export default function MoveBookModal({ open, sheets = [], onCancel, onConfirm }
                 onClick={onCancel}
                 className="px-3 py-2 rounded-full border text-sm"
                 style={{ borderColor: "#f1e6ea", background: "#fff7fa" }}
+                disabled={submitting}
               >
                 取消
               </button>
               <button
-                onClick={() => selected && onConfirm(selected)}
-                disabled={!selected}
+                onClick={handleConfirm}
+                disabled={!selected || submitting}
                 className="px-3 py-2 rounded-full text-sm text-white disabled:opacity-50"
                 style={{ background: "linear-gradient(135deg,#F472B6,#FB7185)" }}
               >
-                确定
+                {submitting ? "处理中…" : "确定"}
               </button>
             </div>
           </motion.div>

@@ -4,7 +4,7 @@ import { useAppStore } from "../store/AppStore";
 import { THEME } from "../lib/theme";
 import { classNames, formatDate } from "../lib/utils";
 import BottomSheetForm from "./modals/BottomSheetForm";
-import ConfirmModal from "./modals/ConfirmModal"; // ✅ 新增：删除书单前确认
+import ConfirmModal from "./modals/ConfirmModal"; // ✅ 删除书单前确认
 import MoveBookModal from "./modals/MoveBookModal";
 
 // 纯UI组件
@@ -130,24 +130,10 @@ export default function BookSheetPanel() {
     setMoveModalOpen(true);
   };
 
-  const handleMoveBook = async (toId) => {
-    if (!activeSheetId || !movingBook) return;
-    try {
-      await moveBookToSheet(activeSheetId, movingBook, toId);
-      const target = sheets.find((s) => s.id === toId);
-      if (target) alert(`已转移到${target.name}`);
-    } catch (e) {
-      const status = e?.response?.status || e?.status;
-      let msg = "转移失败";
-      if (status === 403) msg = "无权限操作";
-      else if (status === 409) msg = "目标书单已存在该书籍";
-      else if (status === 404) msg = "资源不存在";
-      else if (status === 400) msg = "参数错误";
-      alert(msg);
-    } finally {
-      setMoveModalOpen(false);
-      setMovingBook(null);
-    }
+  // ✅ 仅执行业务并返回 Promise，成功/失败 Toast 交给 MoveBookModal 内部处理
+  const handleMoveBook = (toId) => {
+    if (!activeSheetId || !movingBook) return Promise.resolve();
+    return moveBookToSheet(activeSheetId, movingBook, toId);
   };
 
   return (
@@ -177,7 +163,7 @@ export default function BookSheetPanel() {
               active: s.id === activeSheetId,
               onClick: () => setActiveSheetId(s.id),
               onEdit: () => openRenameSheet(s),
-              onDelete: () => requestDeleteSheet(s), // ✅ 改为先请求确认
+              onDelete: () => requestDeleteSheet(s), // ✅ 先请求确认
             }))}
             emptyHint="还没有书单"
           />
@@ -245,7 +231,10 @@ export default function BookSheetPanel() {
       <MoveBookModal
         open={moveModalOpen}
         sheets={sheets.filter((s) => s.id !== activeSheetId)}
-        onCancel={() => setMoveModalOpen(false)}
+        onCancel={() => {
+          setMoveModalOpen(false);
+          setMovingBook(null);
+        }}
         onConfirm={handleMoveBook}
       />
 
