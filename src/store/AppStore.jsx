@@ -163,7 +163,9 @@ export function AppProvider({ children }) {
     if (!user?.id) return;
     try {
       const res = await sheetApi.list(user.id);
-      const list = res?.data?.list ?? res?.list ?? [];
+      // 兼容多种返回结构：数组 / {list: [...]} / AxiosResponse
+      const data = res?.data ?? res ?? [];
+      const list = Array.isArray(data) ? data : data.list ?? [];
       setSheets(list);
       if (list.length && !activeSheetId) setActiveSheetId(list[0].id);
       localStorage.setItem(`sheets_${user.id}`, JSON.stringify(list));
@@ -184,7 +186,8 @@ export function AppProvider({ children }) {
     if (!sheetId) return;
     try {
       const res = await sheetApi.books(sheetId);
-      const list = res?.data?.list ?? res?.list ?? [];
+      const data = res?.data ?? res ?? [];
+      const list = Array.isArray(data) ? data : data.list ?? [];
       setSheetBooks(list);
       if (user?.id)
         localStorage.setItem(
