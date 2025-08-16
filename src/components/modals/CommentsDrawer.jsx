@@ -11,6 +11,9 @@ export default function CommentsDrawer({ open, onClose, item, list, onAdd, onLik
   const [replyingId, setReplyingId] = useState(null);
   const [openReplies, setOpenReplies] = useState({});
 
+  // 限制视觉缩进层级，避免嵌套过深导致排版混乱
+  const MAX_INDENT_DEPTH = 2;
+
   if (!item) return null;
 
   const handleSend = async () => {
@@ -41,7 +44,8 @@ export default function CommentsDrawer({ open, onClose, item, list, onAdd, onLik
       <div
         key={c.id}
         className="flex items-start gap-2"
-        style={{ marginLeft: depth ? depth * 24 : 0 }}
+        // 超过设定的层级后不再继续向右缩进，仅保留最多三层的视觉层级
+        style={{ marginLeft: depth ? Math.min(depth, MAX_INDENT_DEPTH) * 24 : 0 }}
       >
         <img
           src={c.userAvatar || "/default-avatar.png"}
