@@ -1,0 +1,21 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* 保持全局高度 */
+html, body, #root {
+  height: 100%;
+}
+
+/* 内容区域背景：恢复为“浅粉红 → 白色”的柔和渐变 */
+body {
+  /* 不动 header 的背景，header 自己有半透明磨砂 */
+  background: linear-gradient(180deg, #FFF3F6 0%, #FFFFFF 70%);
+  background-attachment: fixed; /* 滚动更顺滑 */
+}
+
+/* 让任何 sticky 的东西都有更高层级，避免被卡片覆盖。
+   注意：FilterBar 本次已做成非 sticky，不会受影响；这条仅兜底其它元素。 */
+.sticky {
+  z-index: 30;
+}
