@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, Heart } from "lucide-react";
 import { THEME } from "../../lib/theme";
@@ -10,6 +10,12 @@ export default function CommentsDrawer({ open, onClose, item, list, onAdd, onLik
   const [replyText, setReplyText] = useState("");
   const [replyingId, setReplyingId] = useState(null);
   const [openReplies, setOpenReplies] = useState({});
+  const replyInputRef = useRef(null);
+
+  // 回复时自动聚焦输入框
+  useEffect(() => {
+    if (replyingId != null) replyInputRef.current?.focus();
+  }, [replyingId]);
 
   // 限制视觉缩进层级，避免嵌套过深导致排版混乱
   const MAX_INDENT_DEPTH = 2;
@@ -32,6 +38,7 @@ export default function CommentsDrawer({ open, onClose, item, list, onAdd, onLik
       await onAdd(replyText.trim(), parentId);
       setReplyText("");
       setReplyingId(null);
+      setOpenReplies((o) => ({ ...o, [parentId]: true }));
     } catch (e) {
       console.error("回复失败", e);
     }
@@ -71,6 +78,7 @@ export default function CommentsDrawer({ open, onClose, item, list, onAdd, onLik
                 onClick={() => {
                   setReplyingId(c.id);
                   setReplyText("");
+                  setOpenReplies((o) => ({ ...o, [c.id]: true }));
                 }}
                 className="hover:text-pink-500"
               >
@@ -89,6 +97,7 @@ export default function CommentsDrawer({ open, onClose, item, list, onAdd, onLik
           {replyingId === c.id && (
             <div className="flex items-center gap-2 mt-2">
               <input
+                ref={replyInputRef}
                 value={replyText}
                 onChange={(e) => setReplyText(e.target.value)}
                 placeholder="回复……"

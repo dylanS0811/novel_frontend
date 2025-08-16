@@ -679,6 +679,25 @@ export function AppProvider({ children }) {
     };
   }, [user?.id]);
 
+  // 打开通知中心时刷新，确保外部互动后能获取最新通知
+  useEffect(() => {
+    if (!notifyOpen || !user?.id) return;
+    let aborted = false;
+    (async () => {
+      try {
+        const res = await notificationApi.list({ userId: user.id, page: 1, size: 20 });
+        const data = res?.data || res || {};
+        const list = data.list ?? data.items ?? [];
+        if (!aborted) setNotifications(list);
+      } catch (e) {
+        console.error("load notifications failed", e);
+      }
+    })();
+    return () => {
+      aborted = true;
+    };
+  }, [notifyOpen, user?.id]);
+
   const store = useMemo(
     () => ({
       // 基础
