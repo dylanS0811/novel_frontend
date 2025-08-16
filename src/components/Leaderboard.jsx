@@ -1,4 +1,5 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useMemo, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { Crown } from "lucide-react";
 import { THEME } from "../lib/theme";
 import { aggregateUserHeat } from "../lib/utils";
@@ -15,35 +16,23 @@ import { aggregateUserHeat } from "../lib/utils";
 export default function Leaderboard({ items = [], onOpenUser, fetcher }) {
   const [tab, setTab] = useState("champion"); // champion | rookie
 
-  // 后端数据（优先使用）
-  const [remote, setRemote] = useState({ loading: false, data: [], err: null });
-
-  useEffect(() => {
-    let aborted = false;
-    const load = async () => {
-      setRemote((s) => ({ ...s, loading: true, err: null }));
-      try {
-        let data;
-        if (fetcher) {
-          data = await fetcher(tab, 10);
-        } else {
-          // 直接调后端 /api/leaderboard
-          const resp = await fetch(`/api/leaderboard?type=${tab}&limit=10`);
-          if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
-          const json = await resp.json();
-          // 兼容返回结构 {code, data: [{ rank, name, avatar, score }]}
-          data = Array.isArray(json?.data) ? json.data : [];
-        }
-        if (!aborted) setRemote({ loading: false, data, err: null });
-      } catch (e) {
-        if (!aborted) setRemote({ loading: false, data: [], err: e });
+  // 后端数据（优先使用）：使用 React Query 以便通过 invalidateQueries 触发实时刷新
+  const {
+    data: remoteData = [],
+    isLoading: remoteLoading,
+  } = useQuery({
+    queryKey: ["leaderboard", tab],
+    queryFn: async () => {
+      if (fetcher) {
+        return await fetcher(tab, 10);
       }
-    };
-    load();
-    return () => {
-      aborted = true;
-    };
-  }, [tab, fetcher]);
+      const resp = await fetch(`/api/leaderboard?type=${tab}&limit=10`);
+      if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+      const json = await resp.json();
+      // 兼容返回结构 {code, data: [{ rank, name, avatar, score }]}
+      return Array.isArray(json?.data) ? json.data : [];
+    },
+  });
 
   // 回退：本地聚合（与原实现一致）
   const localTop10 = useMemo(
@@ -52,7 +41,7 @@ export default function Leaderboard({ items = [], onOpenUser, fetcher }) {
   );
 
   // 实际渲染的数据：优先 remote，其次 local
-  const list = (remote.data?.length ? remote.data : localTop10) || [];
+  const list = (remoteData?.length ? remoteData : localTop10) || [];
 
   return (
     <div
@@ -108,7 +97,7 @@ export default function Leaderboard({ items = [], onOpenUser, fetcher }) {
 
       {/* 列表 */}
       <div className="p-4">
-        {remote.loading && (
+        {remoteLoading && (
           <div className="text-sm text-gray-500 px-2 pb-2">加载中…</div>
         )}
 
@@ -148,7 +137,7 @@ export default function Leaderboard({ items = [], onOpenUser, fetcher }) {
             </button>
           ))}
 
-          {!remote.loading && list.length === 0 && (
+          {!remoteLoading && list.length === 0 && (
             <div className="text-sm text-gray-500 px-2">暂无数据</div>
           )}
         </div>
