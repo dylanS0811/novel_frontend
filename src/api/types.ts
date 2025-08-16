@@ -44,6 +44,10 @@ export interface Notification {
   content?: string;
   read: boolean;
   createdAt: string;
+  actor?: { id: number; name: string; avatar?: string };
+  bookId?: number;
+  bookTitle?: string;
+  commentId?: number;
 }
 
 // —— 排行榜

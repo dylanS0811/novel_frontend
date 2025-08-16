@@ -215,10 +215,25 @@ export const leaderboardApi = {
 // --------------- Notifications -----------
 export interface NotificationItem {
   id: number;
+  /**
+   * 通知类型：
+   * like(书被赞) / comment(书被评) / bookmark(书被收藏)
+   * reply(评论被回复) / comment_like(评论被赞)
+   * mention(@提及) / achievement(成就/榜单) / system(系统消息)
+   */
+  type: string;
+  /** 主文案 */
   title: string;
-  content: string;
+  /** 额外说明，如评论内容摘要 */
+  content?: string;
   read: boolean;
   createdAt: string | number;
+  /** 触发者 */
+  actor?: { id: number; name: string; avatar?: string };
+  /** 关联书籍/评论 ID */
+  bookId?: number;
+  bookTitle?: string;
+  commentId?: number;
 }
 
 export const notificationApi = {

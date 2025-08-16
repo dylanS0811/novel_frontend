@@ -1,13 +1,18 @@
 // src/components/modals/NotificationsDrawer.jsx
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { THEME } from "../../lib/theme";
+import { classNames } from "../../lib/utils";
 import { useAppStore } from "../../store/AppStore";
 import {
   Bell,
   Heart,
   MessageCircle,
   UserPlus,
+  Bookmark,
+  AtSign,
+  Trophy,
+  Info,
   Trash2,
   CheckCheck,
   X,
@@ -17,8 +22,14 @@ import {
 import { notificationApi } from "../../api/sdk";
 
 function ItemIcon({ type }) {
-  if (type === "like") return <Heart className="w-4 h-4" />;
-  if (type === "comment") return <MessageCircle className="w-4 h-4" />;
+  if (type === "like" || type === "comment_like")
+    return <Heart className="w-4 h-4" />;
+  if (type === "comment" || type === "reply")
+    return <MessageCircle className="w-4 h-4" />;
+  if (type === "bookmark") return <Bookmark className="w-4 h-4" />;
+  if (type === "mention") return <AtSign className="w-4 h-4" />;
+  if (type === "achievement") return <Trophy className="w-4 h-4" />;
+  if (type === "system") return <Info className="w-4 h-4" />;
   return <UserPlus className="w-4 h-4" />;
 }
 
@@ -26,12 +37,16 @@ export default function NotificationsDrawer({ open, onClose }) {
   const {
     notifications,
     addNotification,
+    markNotificationRead,
     markAllRead,
-    removeNotification,
     clearNotifications,
     user,
     items,
+    setDetail,
+    setCommentsOpen,
   } = useAppStore();
+
+  const [filter, setFilter] = useState("all");
 
   // 打开时拉取后端通知列表
   useEffect(() => {
@@ -41,27 +56,8 @@ export default function NotificationsDrawer({ open, onClose }) {
         const userId = user?.id || 1;
         const res = await notificationApi.list({ userId, page: 1, size: 50 });
         const list = res?.data?.list || [];
-
-        // 映射到前端结构：{ id, type, who, bookTitle, time, read }
-        const titleById = new Map((items || []).map((b) => [b.id, b.title]));
-        const mapped = list.map((n) => {
-          const t = n.type === "bookmark" ? "like" : n.type || "follow";
-          const who = n.fromUser?.name || "有人";
-          const bookTitle = n.bookId
-            ? titleById.get(n.bookId) || ""
-            : n.bookTitle || "";
-          return {
-            id: n.id,
-            type: t,
-            who,
-            bookTitle,
-            time: n.createdAt || new Date().toISOString(),
-            read: !!n.read,
-          };
-        });
-
         clearNotifications();
-        mapped.forEach(addNotification);
+        list.forEach(addNotification);
       } catch (e) {
         console.error("fetch notifications failed", e);
       }
@@ -78,6 +74,101 @@ export default function NotificationsDrawer({ open, onClose }) {
       console.error("mark read-all failed", e);
     }
     markAllRead();
+  };
+
+  const filters = [
+    { label: "全部", value: "all" },
+    { label: "评论", value: "comment" },
+    { label: "点赞", value: "like" },
+    { label: "收藏", value: "bookmark" },
+    { label: "提及", value: "mention" },
+    { label: "系统", value: "system" },
+    { label: "成就", value: "achievement" },
+  ];
+  const available = new Set(notifications.map((n) => n.type));
+  const filtered = notifications.filter(
+    (n) => filter === "all" || n.type === filter
+  );
+
+  const timeAgo = (ts) => {
+    const d = new Date(ts).getTime();
+    const diff = Date.now() - d;
+    if (Number.isNaN(d)) return "";
+    const sec = Math.floor(diff / 1000);
+    if (sec < 60) return `${sec}秒前`;
+    const min = Math.floor(sec / 60);
+    if (min < 60) return `${min}分钟前`;
+    const hr = Math.floor(min / 60);
+    if (hr < 24) return `${hr}小时前`;
+    const day = Math.floor(hr / 24);
+    if (day < 7) return `${day}天前`;
+    return new Date(ts).toLocaleDateString();
+  };
+
+  const renderText = (n) => {
+    const who = n.actor?.name || "有人";
+    const book = n.bookTitle || "作品";
+    const excerpt = n.content || "";
+    switch (n.type) {
+      case "like":
+        return (
+          <>
+            <b>{who}</b> 点赞了你推荐的 <b>{book}</b>
+          </>
+        );
+      case "comment":
+        return (
+          <>
+            <b>{who}</b> 评论了你推荐的 <b>{book}</b>：{excerpt}
+          </>
+        );
+      case "bookmark":
+        return (
+          <>
+            <b>{who}</b> 收藏了你推荐的 <b>{book}</b>
+          </>
+        );
+      case "reply":
+        return (
+          <>
+            <b>{who}</b> 回复了你的评论：{excerpt}
+          </>
+        );
+      case "comment_like":
+        return (
+          <>
+            <b>{who}</b> 赞了你的评论：{excerpt}
+          </>
+        );
+      case "mention":
+        return (
+          <>
+            <b>{who}</b> 在评论中提到了你：{excerpt}
+          </>
+        );
+      case "achievement":
+        return (
+          <>
+            你的推荐 <b>{book}</b> 上榜「{n.title}」
+          </>
+        );
+      case "system":
+        return <>{n.title}</>;
+      default:
+        return <>{n.title}</>;
+    }
+  };
+
+  const openTarget = async (n) => {
+    await markNotificationRead(n.id);
+    onClose();
+    if (n.bookId) {
+      const book = items.find((b) => b.id === n.bookId);
+      if (book) {
+        setDetail(book);
+        if (n.commentId) setCommentsOpen({ open: true, item: book });
+      }
+    }
   };
 
   return (
@@ -133,62 +224,81 @@ export default function NotificationsDrawer({ open, onClose }) {
               </button>
             </div>
 
-            <div className="mt-3 space-y-2 overflow-auto h-[calc(100%-120px)] pr-1">
-              {notifications.length === 0 && (
+            <div className="mt-3 flex flex-wrap gap-2 text-sm">
+              {filters.map((f) => (
+                <button
+                  key={f.value}
+                  onClick={() => setFilter(f.value)}
+                  disabled={f.value !== "all" && !available.has(f.value)}
+                  className={classNames(
+                    "px-2 py-1 rounded-full border",
+                    filter === f.value ? "bg-rose-50" : "bg-white"
+                  )}
+                  style={{
+                    borderColor: THEME.border,
+                    opacity: f.value !== "all" && !available.has(f.value) ? 0.5 : 1,
+                  }}
+                >
+                  {f.label}
+                </button>
+              ))}
+            </div>
+
+            <div className="mt-3 space-y-2 overflow-auto h-[calc(100%-180px)] pr-1">
+              {filtered.length === 0 && (
                 <div className="text-sm text-gray-500 mt-10 text-center">
                   暂无通知
                 </div>
               )}
 
-              {notifications.map((n) => (
+              {filtered.map((n) => (
                 <div
                   key={n.id}
-                  className="rounded-xl border p-3 bg-white flex items-start gap-2"
+                  onClick={() => openTarget(n)}
+                  className="rounded-xl border p-3 bg-white flex items-start gap-2 cursor-pointer"
                   style={{ borderColor: THEME.border }}
                 >
-                  <div
-                    className="w-8 h-8 rounded-full flex items-center justify-center"
-                    style={{
-                      background: n.read ? "#F3F4F6" : "#FDF2F8",
-                      color: n.read ? "#6B7280" : THEME.rose,
-                    }}
-                    title={n.type}
-                  >
-                    <ItemIcon type={n.type} />
-                  </div>
+                  {n.actor?.avatar ? (
+                    <img
+                      src={n.actor.avatar}
+                      alt="avatar"
+                      className="w-8 h-8 rounded-full"
+                    />
+                  ) : (
+                    <div
+                      className="w-8 h-8 rounded-full flex items-center justify-center"
+                      style={{
+                        background: n.read ? "#F3F4F6" : "#FDF2F8",
+                        color: n.read ? "#6B7280" : THEME.rose,
+                      }}
+                      title={n.type}
+                    >
+                      <ItemIcon type={n.type} />
+                    </div>
+                  )}
 
                   <div className="flex-1 text-sm">
-                    <div className="text-gray-800">
-                      <b>{n.who}</b>
-                      {n.type === "like" && (
-                        <>
-                          {" "}
-                          赞了你推荐的 <b>{n.bookTitle || "作品"}</b>
-                        </>
-                      )}
-                      {n.type === "comment" && (
-                        <>
-                          {" "}
-                          评论了你推荐的 <b>{n.bookTitle || "作品"}</b>
-                        </>
-                      )}
-                      {n.type !== "like" && n.type !== "comment" && <> 关注了你</>}
-                    </div>
+                    <div className="text-gray-800">{renderText(n)}</div>
                     <div className="text-gray-400 text-xs mt-0.5">
-                      {new Date(n.time).toLocaleString()}
+                      {timeAgo(n.createdAt)}
                       {!n.read && (
                         <span className="ml-2 text-rose-500">未读</span>
                       )}
                     </div>
                   </div>
 
-                  <button
-                    onClick={() => removeNotification(n.id)}
-                    className="text-gray-400 hover:text-gray-600"
-                    title="删除"
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </button>
+                  {!n.read && (
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        markNotificationRead(n.id);
+                      }}
+                      className="text-gray-400 hover:text-gray-600"
+                      title="标记已读"
+                    >
+                      <CheckCheck className="w-4 h-4" />
+                    </button>
+                  )}
                 </div>
               ))}
             </div>
