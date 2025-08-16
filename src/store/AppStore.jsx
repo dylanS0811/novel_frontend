@@ -166,8 +166,17 @@ export function AppProvider({ children }) {
       const list = res?.data?.list ?? res?.list ?? [];
       setSheets(list);
       if (list.length && !activeSheetId) setActiveSheetId(list[0].id);
+      localStorage.setItem(`sheets_${user.id}`, JSON.stringify(list));
     } catch (e) {
       console.error("load sheets failed", e);
+      const cached = localStorage.getItem(`sheets_${user.id}`);
+      if (cached) {
+        try {
+          const list = JSON.parse(cached);
+          setSheets(list);
+          if (list.length && !activeSheetId) setActiveSheetId(list[0].id);
+        } catch {}
+      }
     }
   };
 
@@ -177,8 +186,23 @@ export function AppProvider({ children }) {
       const res = await sheetApi.books(sheetId);
       const list = res?.data?.list ?? res?.list ?? [];
       setSheetBooks(list);
+      if (user?.id)
+        localStorage.setItem(
+          `sheetBooks_${user.id}_${sheetId}`,
+          JSON.stringify(list)
+        );
     } catch (e) {
       console.error("load sheet books failed", e);
+      if (user?.id) {
+        const cached = localStorage.getItem(
+          `sheetBooks_${user.id}_${sheetId}`
+        );
+        if (cached) {
+          try {
+            setSheetBooks(JSON.parse(cached));
+          } catch {}
+        }
+      }
     }
   };
 
@@ -189,6 +213,19 @@ export function AppProvider({ children }) {
   useEffect(() => {
     if (activeSheetId) loadSheetBooks(activeSheetId);
   }, [activeSheetId]);
+
+  useEffect(() => {
+    if (!user?.id) return;
+    localStorage.setItem(`sheets_${user.id}`, JSON.stringify(sheets));
+  }, [sheets, user?.id]);
+
+  useEffect(() => {
+    if (!user?.id || !activeSheetId) return;
+    localStorage.setItem(
+      `sheetBooks_${user.id}_${activeSheetId}`,
+      JSON.stringify(sheetBooks)
+    );
+  }, [sheetBooks, user?.id, activeSheetId]);
 
   const addSheet = async (name) => {
     if (!user?.id) return;
