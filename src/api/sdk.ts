@@ -153,6 +153,48 @@ export const bookApi = {
     http.get<{ ids: number[] } | number[]>('/api/books/bookmarks', { params: { userId } }),
 };
 
+// --------------- BookSheets --------------
+export interface SheetItem {
+  id: number;
+  name: string;
+  bookCount?: number;
+  updatedAt?: string | number;
+}
+
+export interface SheetBook {
+  id: number;
+  title: string;
+  author?: string;
+  orientation?: string;
+  category?: string;
+  rating?: number;
+  review?: string;
+  createdAt?: string | number;
+}
+
+export const sheetApi = {
+  list: (userId: number) =>
+    http.get<{ list: SheetItem[] }>(`/api/users/${userId}/sheets`),
+  create: (userId: number, payload: { name: string }) =>
+    http.post<SheetItem>(`/api/users/${userId}/sheets`, payload),
+  update: (id: number, payload: { name: string }) =>
+    http.patch<SheetItem>(`/api/sheets/${id}`, payload),
+  delete: (id: number) => http.delete<void>(`/api/sheets/${id}`),
+  books: (sheetId: number) =>
+    http.get<{ list: SheetBook[] }>(`/api/sheets/${sheetId}/books`),
+  addBook: (
+    sheetId: number,
+    payload: Omit<SheetBook, 'id' | 'createdAt'>,
+  ) => http.post<SheetBook>(`/api/sheets/${sheetId}/books`, payload),
+  updateBook: (
+    sheetId: number,
+    bookId: number,
+    payload: Partial<Omit<SheetBook, 'id' | 'createdAt'>>,
+  ) => http.patch<SheetBook>(`/api/sheets/${sheetId}/books/${bookId}`, payload),
+  removeBook: (sheetId: number, bookId: number) =>
+    http.delete<void>(`/api/sheets/${sheetId}/books/${bookId}`),
+};
+
 // --------------- Tags --------------------
 export const tagApi = {
   suggest: (q: string) =>

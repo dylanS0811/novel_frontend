@@ -1,6 +1,6 @@
 // src/store/AppStore.jsx
 import React, { createContext, useContext, useEffect, useMemo, useState } from "react";
-import { authApi, meApi, bookApi, notificationApi } from "../api/sdk";
+import { authApi, meApi, bookApi, notificationApi, sheetApi } from "../api/sdk";
 
 const AppCtx = createContext(null);
 
@@ -98,6 +98,11 @@ export function AppProvider({ children }) {
   const [user, setUser] = useState(null);
   const [authOpen, setAuthOpen] = useState(false);
 
+  // 个人书单
+  const [sheets, setSheets] = useState([]);
+  const [sheetBooks, setSheetBooks] = useState([]);
+  const [activeSheetId, setActiveSheetId] = useState(null);
+
   // 发送短信验证码
   const sendPhoneCode = async (phone) => {
     await authApi.sendPhoneCode({ phone });
@@ -151,6 +156,103 @@ export function AppProvider({ children }) {
     setUser(null);
     setLikedIds(new Set());
     setSavedIds(new Set());
+  };
+
+  // ===== 个人书单 =====
+  const loadSheets = async () => {
+    if (!user?.id) return;
+    try {
+      const res = await sheetApi.list(user.id);
+      const list = res?.data?.list ?? res?.list ?? [];
+      setSheets(list);
+      if (list.length && !activeSheetId) setActiveSheetId(list[0].id);
+    } catch (e) {
+      console.error("load sheets failed", e);
+    }
+  };
+
+  const loadSheetBooks = async (sheetId) => {
+    if (!sheetId) return;
+    try {
+      const res = await sheetApi.books(sheetId);
+      const list = res?.data?.list ?? res?.list ?? [];
+      setSheetBooks(list);
+    } catch (e) {
+      console.error("load sheet books failed", e);
+    }
+  };
+
+  useEffect(() => {
+    loadSheets();
+  }, [user?.id]);
+
+  useEffect(() => {
+    if (activeSheetId) loadSheetBooks(activeSheetId);
+  }, [activeSheetId]);
+
+  const addSheet = async (name) => {
+    if (!user?.id) return;
+    try {
+      const res = await sheetApi.create(user.id, { name });
+      const s = res?.data || res;
+      setSheets((prev) => [...prev, s]);
+    } catch (e) {
+      console.error("add sheet failed", e);
+    }
+  };
+
+  const renameSheet = async (id, name) => {
+    try {
+      const res = await sheetApi.update(id, { name });
+      const s = res?.data || res;
+      setSheets((prev) => prev.map((x) => (x.id === id ? { ...x, ...s } : x)));
+    } catch (e) {
+      console.error("rename sheet failed", e);
+    }
+  };
+
+  const removeSheet = async (id) => {
+    try {
+      await sheetApi.delete(id);
+      setSheets((prev) => prev.filter((x) => x.id !== id));
+      if (id === activeSheetId) {
+        setActiveSheetId(null);
+        setSheetBooks([]);
+      }
+    } catch (e) {
+      console.error("remove sheet failed", e);
+    }
+  };
+
+  const addBookToSheet = async (sheetId, payload) => {
+    try {
+      const res = await sheetApi.addBook(sheetId, payload);
+      const b = res?.data || res;
+      if (sheetId === activeSheetId) setSheetBooks((prev) => [...prev, b]);
+    } catch (e) {
+      console.error("add book to sheet failed", e);
+    }
+  };
+
+  const updateBookInSheet = async (sheetId, bookId, payload) => {
+    try {
+      const res = await sheetApi.updateBook(sheetId, bookId, payload);
+      const b = res?.data || res;
+      if (sheetId === activeSheetId)
+        setSheetBooks((prev) => prev.map((x) => (x.id === b.id ? b : x)));
+    } catch (e) {
+      console.error("update book in sheet failed", e);
+    }
+  };
+
+  const removeBookFromSheet = async (sheetId, bookId) => {
+    try {
+      await sheetApi.removeBook(sheetId, bookId);
+      if (sheetId === activeSheetId)
+        setSheetBooks((prev) => prev.filter((x) => x.id !== bookId));
+    } catch (e) {
+      console.error("remove book from sheet failed", e);
+    }
   };
 
   // ===== 通知中心 =====
@@ -560,6 +662,20 @@ export function AppProvider({ children }) {
       loginWithPhone,
       logout,
 
+      // 个人书单
+      sheets,
+      sheetBooks,
+      activeSheetId,
+      setActiveSheetId,
+      loadSheets,
+      loadSheetBooks,
+      addSheet,
+      renameSheet,
+      removeSheet,
+      addBookToSheet,
+      updateBookInSheet,
+      removeBookFromSheet,
+
       // 通知
       notifications,
       notifyOpen,
@@ -593,6 +709,9 @@ export function AppProvider({ children }) {
       search,
       user,
       authOpen,
+      sheets,
+      sheetBooks,
+      activeSheetId,
       notifications,
       notifyOpen,
       unreadCount,
