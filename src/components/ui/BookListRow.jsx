@@ -8,7 +8,7 @@ import { classNames } from "../../lib/utils";
  *  - book: { title, author, orientation, category, rating, reason/intro/tags ... }
  *  - onEdit, onDelete
  */
-export default function BookListRow({ book = {}, onEdit, onDelete }) {
+export default function BookListRow({ book = {}, onEdit, onDelete, onMove }) {
   const title = book.title || book.name || "未命名书籍";
   const author = book.author || "未知作者";
   const orientation = book.orientation || book.sexuality || "";
@@ -77,6 +77,12 @@ export default function BookListRow({ book = {}, onEdit, onDelete }) {
           className="text-xs text-gray-500 hover:text-gray-700"
         >
           编辑
+        </button>
+        <button
+          onClick={onMove}
+          className="text-xs text-gray-500 hover:text-gray-700"
+        >
+          转移
         </button>
         <button
           onClick={onDelete}
