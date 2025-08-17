@@ -54,10 +54,11 @@ function buildCommentTree(list = []) {
 }
 
 function findCommentDepth(arr = [], targetId, depth = 0) {
+  const tid = Number(targetId);
   for (const c of arr) {
-    if (c.id === targetId) return depth;
+    if (Number(c.id) === tid) return depth;
     if (c.replies) {
-      const d = findCommentDepth(c.replies, targetId, depth + 1);
+      const d = findCommentDepth(c.replies, tid, depth + 1);
       if (d !== -1) return d;
     }
   }
@@ -436,8 +437,9 @@ export function AppProvider({ children }) {
       setAuthOpen(true);
       throw new Error("not logged in");
     }
-    if (parentId) {
-      const depth = findCommentDepth(commentsMap[Number(bookId)] || [], parentId);
+    const pid = parentId != null ? Number(parentId) : null;
+    if (pid) {
+      const depth = findCommentDepth(commentsMap[Number(bookId)] || [], pid);
       if (depth >= 2) {
         alert("最多只能回复到第3层");
         return;
@@ -445,7 +447,7 @@ export function AppProvider({ children }) {
     }
     try {
       const payload = { text, userId: user.id };
-      if (parentId) payload.parentId = parentId;
+      if (pid) payload.parentId = pid;
       const c = await bookApi.addComment(Number(bookId), payload);
       const created =
         c?.data ||
@@ -456,16 +458,16 @@ export function AppProvider({ children }) {
           text,
           createdAt: new Date().toISOString(),
           likes: 0,
-          parentId: parentId ?? null,
+          parentId: pid ?? null,
         };
       setCommentsMap((m) => {
         const next = { ...m };
         const key = Number(bookId);
         const list = next[key] ? [...next[key]] : [];
-        if (parentId) {
+        if (pid) {
           const insert = (arr) =>
             arr.map((item) => {
-              if (item.id === parentId) {
+              if (Number(item.id) === pid) {
                 return {
                   ...item,
                   replies: sortComments([...(item.replies || []), created]),
