@@ -1,5 +1,5 @@
 // src/components/modals/NotificationsDrawer.jsx
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { THEME } from "../../lib/theme";
 import { classNames } from "../../lib/utils";
@@ -18,9 +18,6 @@ import {
   X,
 } from "lucide-react";
 
-// 新增：对接后端（修正命名：notificationApi）
-import { notificationApi } from "../../api/sdk";
-
 // 通知类型元信息
 const TYPE_META = {
   like: { label: "点赞", icon: Heart },
@@ -33,17 +30,6 @@ const TYPE_META = {
   comment_like: { label: "点赞", icon: Heart },
 };
 
-const BACKEND_TYPE_MAP = {
-  BOOK_LIKED: "like",
-  BOOK_BOOKMARKED: "bookmark",
-  BOOK_COMMENTED: "comment",
-  COMMENT_REPLIED: "reply",
-  COMMENT_LIKED: "comment_like",
-  BOOK_MENTIONED: "mention",
-  SYSTEM: "system",
-  ACHIEVEMENT_UNLOCKED: "achievement",
-};
-
 function ItemIcon({ type }) {
   const Icon = TYPE_META[type]?.icon || UserPlus;
   return <Icon className="w-4 h-4" />;
@@ -52,11 +38,9 @@ function ItemIcon({ type }) {
 export default function NotificationsDrawer({ open, onClose }) {
   const {
     notifications,
-    addNotification,
     markNotificationRead,
     markAllRead,
     clearNotifications,
-    user,
     items,
     setDetail,
     setCommentsOpen,
@@ -64,36 +48,8 @@ export default function NotificationsDrawer({ open, onClose }) {
 
   const [filter, setFilter] = useState("all");
 
-  // 打开时拉取后端通知列表
-  useEffect(() => {
-    const fetchList = async () => {
-      if (!open) return;
-      try {
-        const userId = user?.id || 1;
-        const res = await notificationApi.list({ userId, page: 1, size: 50 });
-        const list = (res?.data?.list || []).map((n) => ({
-          ...n,
-          type: BACKEND_TYPE_MAP[n.type] || n.type?.toLowerCase(),
-          bookTitle: n.bookTitle || n.title,
-        }));
-        clearNotifications();
-        list.forEach(addNotification);
-      } catch (e) {
-        console.error("fetch notifications failed", e);
-      }
-    };
-    fetchList();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [open]);
-
   const doMarkAllRead = async () => {
-    try {
-      const userId = user?.id || 1;
-      await notificationApi.readAll(userId);
-    } catch (e) {
-      console.error("mark read-all failed", e);
-    }
-    markAllRead();
+    await markAllRead();
   };
 
   const filters = [
@@ -105,9 +61,19 @@ export default function NotificationsDrawer({ open, onClose }) {
     { label: "系统", value: "system" },
     { label: "成就", value: "achievement" },
   ];
-  const available = new Set(notifications.map((n) => n.type));
+  const available = new Set(
+    notifications.map((n) => {
+      if (n.type === "reply") return "comment";
+      if (n.type === "comment_like") return "like";
+      return n.type;
+    })
+  );
   const filtered = notifications.filter(
-    (n) => filter === "all" || n.type === filter
+    (n) =>
+      filter === "all" ||
+      n.type === filter ||
+      (filter === "comment" && n.type === "reply") ||
+      (filter === "like" && n.type === "comment_like")
   );
 
   const timeAgo = (ts) => {
