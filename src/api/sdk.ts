@@ -111,8 +111,11 @@ export const bookApi = {
   checkExist: (payload: { title: string; author?: string }) =>
     http.get<{ exists: boolean }>('/api/books/check', { params: payload }),
 
-  update: (id: number, payload: Partial<Omit<BookSummary, 'id'>>) =>
-    http.put<BookSummary>(`/api/books/${id}`, payload),
+  update: (
+    id: number,
+    userId: number,
+    payload: Partial<Omit<BookSummary, 'id'>>,
+  ) => http.put<BookSummary>(`/api/books/${id}`, payload, { params: { userId } }),
 
   patch: (id: number, payload: Partial<Omit<BookSummary, 'id'>>) =>
     http.patch<BookSummary>(`/api/books/${id}`, payload),

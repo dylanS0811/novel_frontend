@@ -82,11 +82,11 @@ export const useCreateBook = () => {
 };
 
 // 覆盖更新
-export const useUpdateBook = (id?: number) => {
+export const useUpdateBook = (id?: number, userId?: number) => {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (payload: Parameters<typeof bookApi.update>[1]) =>
-      bookApi.update(id as number, payload),
+    mutationFn: (payload: Parameters<typeof bookApi.update>[2]) =>
+      bookApi.update(id as number, userId as number, payload),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['book', id] });
       qc.invalidateQueries({ queryKey: ['books'] });
