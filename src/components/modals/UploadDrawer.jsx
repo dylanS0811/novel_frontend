@@ -212,7 +212,7 @@ export default function UploadDrawer({ open, onClose, onSubmit }) {
       console.warn("check book duplicate failed", e);
     }
 
-    const payload = { title, author, tags, raw, orientation, category, blurb, summary };
+    const payload = { title, author, tags, orientation, category, blurb, summary };
 
     // 若父层提供 onSubmit，可先执行（用于本地插卡等），无论结果如何都继续真实落库
     if (onSubmit) {
