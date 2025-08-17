@@ -1,12 +1,12 @@
-// src/components/ui/BookListRow.jsx
-import React from "react";
-import { classNames } from "../../lib/utils";
+import React, { useState } from "react";
+import BookHoverCard from "./BookHoverCard";
+import SheetBookDetailModal from "../modals/SheetBookDetailModal";
 
 /**
- * 右侧书籍“行式列表”的单行
+ * 右侧书籍“行式列表”的单行（纯 UI + 事件回调）
  * props:
- *  - book: { title, author, orientation, category, rating, reason/intro/tags ... }
- *  - onEdit, onDelete
+ *  - book: { title, author, orientation, category, rating, review/oneLine/brief..., tags, createdAt, updatedAt }
+ *  - onEdit, onDelete, onMove
  */
 export default function BookListRow({ book = {}, onEdit, onDelete, onMove }) {
   const title = book.title || book.name || "未命名书籍";
@@ -23,6 +23,7 @@ export default function BookListRow({ book = {}, onEdit, onDelete, onMove }) {
   // 兼容不同字段名：一句话推荐/简介
   const oneLine =
     book.oneLine ||
+    book.review || // 如果后端就是 review 字段，优先使用
     book.reason ||
     book.brief ||
     book.blurb ||
@@ -32,9 +33,22 @@ export default function BookListRow({ book = {}, onEdit, onDelete, onMove }) {
   // 可选标签数组
   const tags = Array.isArray(book.tags) ? book.tags : [];
 
+  // 供 HoverCard / Modal 使用的“规范化”对象
+  const uiBook = {
+    ...book,
+    title,
+    author,
+    orientation,
+    category,
+    rating: rating === "" ? undefined : rating,
+    review: oneLine || book.review,
+  };
+
+  const [detailOpen, setDetailOpen] = useState(false);
+
   return (
     <div className="flex items-start gap-4 px-4 py-3 bg-white/70">
-      {/* 左侧：占位封面/首字母（如果无封面就给个优雅占位） */}
+      {/* 左侧：占位封面/首字母 */}
       <div className="w-10 h-14 rounded-lg bg-pink-50 text-pink-400 flex items-center justify-center shrink-0 select-none">
         <span className="text-base">{String(title).charAt(0)}</span>
       </div>
@@ -42,7 +56,13 @@ export default function BookListRow({ book = {}, onEdit, onDelete, onMove }) {
       {/* 中间：主要信息 */}
       <div className="min-w-0 flex-1">
         <div className="flex items-center gap-2 min-w-0">
-          <div className="truncate font-medium text-gray-900">{title}</div>
+          {/* 书名（悬停展示预览卡，点击“查看详情”弹窗） */}
+          <BookHoverCard book={uiBook} onView={() => setDetailOpen(true)} align="left">
+            <button className="truncate font-medium text-pink-500 hover:underline">
+              {title}
+            </button>
+          </BookHoverCard>
+
           <div className="truncate text-xs text-gray-500">/ {author}</div>
           {rating !== "" && (
             <span className="ml-2 text-xs rounded-full bg-pink-50 text-pink-600 px-2 py-0.5">
@@ -72,25 +92,23 @@ export default function BookListRow({ book = {}, onEdit, onDelete, onMove }) {
 
       {/* 右侧：操作 */}
       <div className="flex items-center gap-2 shrink-0">
-        <button
-          onClick={onEdit}
-          className="text-xs text-gray-500 hover:text-gray-700"
-        >
+        <button onClick={onEdit} className="text-xs text-gray-500 hover:text-gray-700">
           编辑
         </button>
-        <button
-          onClick={onMove}
-          className="text-xs text-gray-500 hover:text-gray-700"
-        >
+        <button onClick={onMove} className="text-xs text-gray-500 hover:text-gray-700">
           转移
         </button>
-        <button
-          onClick={onDelete}
-          className="text-xs text-gray-400 hover:text-red-500"
-        >
+        <button onClick={onDelete} className="text-xs text-gray-400 hover:text-red-500">
           删除
         </button>
       </div>
+
+      {/* 详情弹窗（点击“查看详情”打开） */}
+      <SheetBookDetailModal
+        open={detailOpen}
+        book={uiBook}
+        onClose={() => setDetailOpen(false)}
+      />
     </div>
   );
 }

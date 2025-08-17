@@ -14,6 +14,7 @@ export default defineConfig({
         // 后端本来就带 /api 前缀，不需要改写：
         // rewrite: (p) => p,
       },
+      '/uploads': { target: 'http://localhost:8080', changeOrigin: true }, // ★关键
     },
   },
 });
