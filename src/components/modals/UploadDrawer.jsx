@@ -214,20 +214,11 @@ export default function UploadDrawer({ open, onClose, onSubmit }) {
 
     const payload = { title, author, tags, raw, orientation, category, blurb, summary };
 
-    // 若父层提供 onSubmit，则先试；若未返回 truthy 或抛错，则回落到真实落库
+    // 若父层提供 onSubmit，可先执行（用于本地插卡等），无论结果如何都继续真实落库
     if (onSubmit) {
       try {
         setSubmitting(true);
-        const ret = await onSubmit(payload);
-        if (ret) {
-          setToast({ msg: "发布成功", type: "success" });
-          setTimeout(() => onClose && onClose(), 300);
-          // 触发一次真实拉取，保证和后端一致
-          setPage(1);
-          qc.invalidateQueries({ queryKey: ["books"] });
-          qc.invalidateQueries({ queryKey: ["leaderboard"] });
-          return;
-        }
+        await onSubmit(payload);
       } catch (e) {
         console.warn("onSubmit error, fallback to api.create", e);
       } finally {
@@ -235,7 +226,7 @@ export default function UploadDrawer({ open, onClose, onSubmit }) {
       }
     }
 
-    // 回落：直接调后端
+    // 真实落库
     try {
       await fallbackSubmit(payload);
     } catch {
