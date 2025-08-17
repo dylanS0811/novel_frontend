@@ -5,20 +5,20 @@ import NovelCard from "../components/NovelCard";
 import { useAppStore } from "../store/AppStore";
 
 export default function UserProfilePage() {
-  const { name } = useParams();
-  const displayName = decodeURIComponent(name || "");
+  const { nick } = useParams();
+  const displayNick = decodeURIComponent(nick || "");
   const { items } = useAppStore();
 
   // 从后端列表中过滤出 TA 推荐的书
   const recs = (items || []).filter(
-    (i) => i?.recommender?.name === displayName
+    (i) => i?.recommender?.nick === displayNick
   );
 
   // 头像：优先用书卡里 recommender.avatar（若能命中），否则占位
   const avatarFromBooks =
     recs.find((i) => i?.recommender?.avatar)?.recommender?.avatar || null;
   const user = {
-    name: displayName,
+    nick: displayNick,
     avatar: avatarFromBooks || "https://i.pravatar.cc/80?img=24",
   };
 
@@ -27,7 +27,7 @@ export default function UserProfilePage() {
       <div className="flex items-center gap-4">
         <img src={user.avatar} className="w-20 h-20 rounded-full" />
         <div>
-          <div className="text-xl font-semibold">{user.name}</div>
+          <div className="text-xl font-semibold">{user.nick}</div>
           <div className="text-gray-500 text-sm">仅展示：头像、昵称、TA推荐的书</div>
         </div>
       </div>

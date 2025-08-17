@@ -102,17 +102,19 @@ export default function Leaderboard({ items = [], onOpenUser, fetcher }) {
         )}
 
         <div className="space-y-3">
-          {list.map((u, i) => (
-            <button
-              key={(u.name || u.nick || "u") + i}
-              onClick={() => onOpenUser && onOpenUser({ name: u.name, avatar: u.avatar })}
-              className="w-full text-left flex items-center gap-3 rounded-xl px-2 py-2 transition"
-              style={{
-                background: i < 3 ? "rgba(254,243,199,0.45)" : "#FFFFFF",
-                border: `1px solid ${THEME.border}`,
-              }}
-              type="button"
-            >
+          {list.map((u, i) => {
+            const displayNick = u.nick || u.name;
+            return (
+              <button
+                key={(displayNick || "u") + i}
+                onClick={() => onOpenUser && onOpenUser({ nick: displayNick, avatar: u.avatar })}
+                className="w-full text-left flex items-center gap-3 rounded-xl px-2 py-2 transition"
+                style={{
+                  background: i < 3 ? "rgba(254,243,199,0.45)" : "#FFFFFF",
+                  border: `1px solid ${THEME.border}`,
+                }}
+                type="button"
+              >
               {/* 序号徽章：前 3 名更醒目 */}
               <div
                 className="w-8 h-8 rounded-full flex items-center justify-center text-white text-sm"
@@ -131,11 +133,12 @@ export default function Leaderboard({ items = [], onOpenUser, fetcher }) {
                 {i + 1}
               </div>
 
-              <img src={u.avatar} className="w-8 h-8 rounded-full" alt={u.name} />
-              <div className="flex-1">{u.name}</div>
+              <img src={u.avatar} className="w-8 h-8 rounded-full" alt={displayNick} />
+              <div className="flex-1">{displayNick}</div>
               <div className="text-sm text-gray-600">{u.score}</div>
             </button>
-          ))}
+            );
+          })}
 
           {!remoteLoading && list.length === 0 && (
             <div className="text-sm text-gray-500 px-2">暂无数据</div>

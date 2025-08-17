@@ -68,7 +68,7 @@ function Shell() {
       likes: 0,
       bookmarks: 0,
       comments: 0,
-      recommender: { name: nick, avatar: "https://i.pravatar.cc/80?img=15", count: 1 },
+      recommender: { nick: nick, avatar: "https://i.pravatar.cc/80?img=15", count: 1 },
     };
     setItems((arr) => [newItem, ...arr]);
     setShowUpload(false);
@@ -154,7 +154,7 @@ export default function App() {
         <Route index element={<HomePage />} />
         <Route path="/me" element={<ProfilePage />} />
         <Route path="/me/bookshelf" element={<BookshelfPage />} />
-        <Route path="/u/:name" element={<UserProfilePage />} />
+        <Route path="/u/:nick" element={<UserProfilePage />} />
       </Route>
     </Routes>
   );

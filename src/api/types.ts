@@ -19,14 +19,14 @@ export interface Book {
   bookmarks: number;
   comments: number;
   createdAt?: string; // 或 ISO
-  recommender?: { id: number; name: string; avatar?: string };
+  recommender?: { id: number; nick: string; avatar?: string };
 }
 
 // —— 评论
 export interface Comment {
   id: number;
   userId: number;
-  userName: string;
+  nick: string;
   userAvatar?: string;
   text: string;
   createdAt: string;
@@ -44,7 +44,7 @@ export interface Notification {
   content?: string;
   read: boolean;
   createdAt: string;
-  actor?: { id: number; name: string; avatar?: string };
+  actor?: { id: number; nick: string; avatar?: string };
   bookId?: number;
   bookTitle?: string;
   commentId?: number;
