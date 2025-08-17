@@ -507,8 +507,27 @@ export function AppProvider({ children }) {
       setAuthOpen(true);
       return;
     }
+    const liked = target.liked;
+    const inc = liked ? -1 : 1;
+
+    // Optimistic update
+    setCommentsMap((m) => {
+      const replace = (arr) =>
+        arr.map((item) => {
+          if (item.id === commentId) {
+            return {
+              ...item,
+              liked: !liked,
+              likes: Math.max(0, Number(item.likes || 0) + inc),
+            };
+          }
+          if (item.replies) return { ...item, replies: replace(item.replies) };
+          return item;
+        });
+      return { ...m, [key]: replace(m[key] || []) };
+    });
+
     try {
-      const liked = target.liked;
       const res = liked
         ? await bookApi.unlikeComment(commentId, user.id)
         : await bookApi.likeComment(commentId, user.id);
@@ -520,14 +539,29 @@ export function AppProvider({ children }) {
               if (item.id === commentId) {
                 return { ...item, ...updated };
               }
-              if (item.replies)
-                return { ...item, replies: replace(item.replies) };
+              if (item.replies) return { ...item, replies: replace(item.replies) };
               return item;
             })
           );
         return { ...m, [key]: replace(m[key] || []) };
       });
     } catch (e) {
+      // Revert optimistic update on failure
+      setCommentsMap((m) => {
+        const replace = (arr) =>
+          arr.map((item) => {
+            if (item.id === commentId) {
+              return {
+                ...item,
+                liked,
+                likes: Math.max(0, Number(item.likes || 0) - inc),
+              };
+            }
+            if (item.replies) return { ...item, replies: replace(item.replies) };
+            return item;
+          });
+        return { ...m, [key]: replace(m[key] || []) };
+      });
       console.error("toggle comment like failed", e);
     }
   };
