@@ -39,7 +39,7 @@ export interface CommentItem {
 
 // --------------- Auth --------------------
 export const authApi = {
-  register: (payload: { handle: string; password: string }) =>
+  register: (payload: { handle: string; nick: string; password: string }) =>
     http.post<{ ok: boolean }>('/api/auth/register', payload),
   login: (payload: { handle: string; password: string }) =>
     http.post<{ token: string; user: User }>('/api/auth/login', payload),

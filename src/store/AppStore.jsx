@@ -127,9 +127,9 @@ export function AppProvider({ children }) {
   };
 
   // 注册账号
-  const registerAccount = async (handle, password) => {
+  const registerAccount = async (handle, nick, password) => {
     try {
-      await authApi.register({ handle, password });
+      await authApi.register({ handle, nick, password });
     } catch (e) {
       console.error("register failed", e);
       throw e;
