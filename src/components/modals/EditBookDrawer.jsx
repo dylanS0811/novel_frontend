@@ -97,7 +97,7 @@ export default function EditBookDrawer({ open, bookId, onClose }) {
   const [expired, setExpired] = useState(false);
 
   const { user } = useAppStore();
-  const updateBook = useUpdateBook(bookId);
+  const updateBook = useUpdateBook(bookId, user?.id);
 
   const allBaseTags = useMemo(() => Array.from(new Set(TAGS)), []);
   const [remoteSuggest, setRemoteSuggest] = useState([]);
