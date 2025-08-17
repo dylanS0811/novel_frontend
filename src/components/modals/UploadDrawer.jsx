@@ -79,7 +79,6 @@ function Toast({ message = "", type = "success", onClose }) {
 }
 
 export default function UploadDrawer({ open, onClose, onSubmit }) {
-  const [raw, setRaw] = useState("");
   const [title, setTitle] = useState("");
   const [author, setAuthor] = useState("");
   const [tags, setTags] = useState([]);
@@ -96,16 +95,6 @@ export default function UploadDrawer({ open, onClose, onSubmit }) {
   const qc = useQueryClient();
   const createBook = useCreateBook();
   const { user, setPage } = useAppStore();
-
-  // 从原文自动提取默认字段
-  useEffect(() => {
-    if (!raw) return;
-    const m = raw.match(/《([^》]+)》/);
-    if (!title) setTitle(m ? `《${m[1]}》` : "未命名-" + Math.floor(Math.random() * 10000));
-    if (!blurb) setBlurb((raw || "").slice(0, 60));
-    if (!summary) setSummary((raw || "").slice(0, 200));
-    // eslint-disable-next-line
-  }, [raw]);
 
   const allBaseTags = useMemo(() => Array.from(new Set(TAGS)), []);
   const [remoteSuggest, setRemoteSuggest] = useState([]);
@@ -179,7 +168,6 @@ export default function UploadDrawer({ open, onClose, onSubmit }) {
       // 关闭 + 清表单
       setTimeout(() => {
         onClose && onClose();
-        setRaw("");
         setTitle("");
         setAuthor("");
         setTags([]);
@@ -289,14 +277,6 @@ export default function UploadDrawer({ open, onClose, onSubmit }) {
                 <Upload className="w-5 h-5" style={{ color: THEME.rose }} />
                 <div className="font-semibold">闪电上传（60秒）</div>
               </div>
-
-              <textarea
-                value={raw}
-                onChange={(e) => setRaw(e.target.value)}
-                placeholder="粘贴文本或链接（自动提取《书名》、推荐语60字、简介200字）"
-                className="w-full border rounded-2xl p-3 h-32 bg白/70"
-                style={{ borderColor: THEME.border }}
-              />
 
               <div className="mt-3 grid grid-cols-1 md:grid-cols-2 gap-3">
                 <div>
