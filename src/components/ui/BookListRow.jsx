@@ -40,8 +40,9 @@ export default function BookListRow({ book = {}, onEdit, onDelete, onMove }) {
     author,
     orientation,
     category,
-    rating: rating === "" ? undefined : rating,
-    review: oneLine || book.review,
+      rating: rating === "" ? undefined : rating,
+      // oneLine 已包含各种字段兼容，这里直接复用避免字段重复
+      review: oneLine,
   };
 
   const [detailOpen, setDetailOpen] = useState(false);

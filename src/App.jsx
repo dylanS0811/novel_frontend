@@ -84,10 +84,14 @@ function Shell() {
   };
 
   const currentBookId = commentsOpen?.item?.id;
-  const commentList = currentBookId ? commentsMap[currentBookId] || [] : [];
+  // 使用数字键读取，避免字符串/数字混用导致取不到缓存的评论
+  const commentList = currentBookId
+    ? commentsMap[Number(currentBookId)] || []
+    : [];
 
   // ✅ 关键修复：发表评论后，除更新本地 commentsMap 外，失效刷新首页/榜单，让评论数立刻 +1
   const handleAddComment = async (text, parentId) => {
+    if (typeof addComment !== "function") return;
     await addComment(text, parentId); // 调后端并更新 commentsMap
     qc.invalidateQueries({ queryKey: ["books"] });
     qc.invalidateQueries({ queryKey: ["leaderboard"] });
