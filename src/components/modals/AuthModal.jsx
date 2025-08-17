@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 import { THEME } from "../../lib/theme";
 import { useAppStore } from "../../store/AppStore";
+import { meApi } from "../../api/sdk";
 
 /** -----------------------------------------------
  * 新版 登录 / 注册 弹窗
@@ -25,6 +26,7 @@ export default function AuthModal({ open, onClose }) {
 
   const [mode, setMode] = useState("login"); // 'login' | 'register'
   const [handle, setHandle] = useState("");  // 用户名/邮箱/手机号
+  const [nick, setNick] = useState(""); // 昵称
   const [password, setPassword] = useState("");
   const [confirm, setConfirm] = useState("");
   const [showPwd, setShowPwd] = useState(false);
@@ -72,6 +74,19 @@ export default function AuthModal({ open, onClose }) {
   const pwdError =
     password && password.length < 6 ? "密码至少 6 位" : null;
 
+  const nickTrim = nick.trim();
+  const isNickname = (v) =>
+    /^(?=.{2,20}$)[\u4e00-\u9fa5A-Za-z0-9._\-\s]+$/.test(v) &&
+    !/(\.\.|__|--)/.test(v);
+  const nickError =
+    mode === "register" && nick
+      ? !isNickname(nickTrim)
+        ? "昵称支持中文、字母、数字、空格和 . _ -，长度 2-20，且不能连续重复符号"
+        : handleType === "username" && nickTrim === handle.trim()
+        ? "昵称与用户名冲突，请更换"
+        : null
+      : null;
+
   const confirmError =
     mode === "register" && confirm
       ? confirm !== password
@@ -84,7 +99,11 @@ export default function AuthModal({ open, onClose }) {
     handleType !== "invalid" &&
     password &&
     password.length >= 6 &&
-    (mode === "login" || (mode === "register" && confirm === password));
+    (mode === "login" ||
+      (mode === "register" &&
+        confirm === password &&
+        nickTrim &&
+        !nickError));
 
   // ---------- 提交 ----------
   const onSubmit = async (e) => {
@@ -95,7 +114,14 @@ export default function AuthModal({ open, onClose }) {
     setMsg(null);
     try {
       if (mode === "register") {
-        await registerAccount(handle.trim(), password);
+        const ck = await meApi.checkNickname(nickTrim);
+        const exists = ck?.data?.exists ?? ck?.exists;
+        if (exists) {
+          setMsg({ type: "error", text: "昵称已被占用" });
+          setLoading(false);
+          return;
+        }
+        await registerAccount(handle.trim(), nickTrim, password);
         // 注册完成给出成功提示，并自动切换到登录
         setMsg({ type: "success", text: "注册成功，请登录" });
         setMode("login");
@@ -211,10 +237,30 @@ export default function AuthModal({ open, onClose }) {
                     placeholder="如：aqiuyu、name@example.com 或 13000000000"
                   />
                 </div>
-                {handleError && (
-                  <div className="mt-1 text-xs text-rose-500">{handleError}</div>
+              {handleError && (
+                <div className="mt-1 text-xs text-rose-500">{handleError}</div>
+              )}
+            </div>
+
+            {/* 昵称（注册） */}
+            {mode === "register" && (
+              <div className="mb-3">
+                <label className="text-xs text-gray-600">昵称（对外展示，可修改）</label>
+                <div className="mt-1 flex items-center gap-2 rounded-xl px-3 py-2 border bg-white/70">
+                  <User2 className="w-4 h-4 opacity-60" />
+                  <input
+                    value={nick}
+                    onChange={(e) => setNick(e.target.value)}
+                    onKeyDown={onKeyDown}
+                    className="flex-1 outline-none bg-transparent text-sm"
+                    placeholder="昵称（对外展示，可修改）"
+                  />
+                </div>
+                {nickError && (
+                  <div className="mt-1 text-xs text-rose-500">{nickError}</div>
                 )}
               </div>
+            )}
 
               {/* 密码 */}
               <div className="mb-3">

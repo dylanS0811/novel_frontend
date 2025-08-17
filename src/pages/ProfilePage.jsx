@@ -1,6 +1,6 @@
 // src/pages/ProfilePage.jsx
 // 个人中心：头像昵称 + 优雅的昵称编辑卡片 + 书架分栏（收藏 / 我推荐 / 个人书单）
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { AnimatePresence, motion } from "framer-motion";
 import { Edit3, Loader2 } from "lucide-react";
@@ -158,10 +158,12 @@ export function BookshelfSection() {
 }
 
 export default function ProfilePage() {
-  const { nick, setNick, avatar } = useAppStore();
+  const { nick, setNick, avatar, setAvatar, setUser } = useAppStore();
   const [val, setVal] = useState(nick);
   const [toast, setToast] = useState("");
   const [saving, setSaving] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const fileRef = useRef(null);
   const displayAvatar = avatar || "https://i.pravatar.cc/120?img=15";
 
   // 配置：昵称长度限制
@@ -200,6 +202,7 @@ export default function ProfilePage() {
       const r = await meApi.patch({ nickname: trimmed, avatar });
       const d = r?.data ?? r ?? {};
       setNick(d.nick ?? trimmed);
+      setUser((u) => (u ? { ...u, nick: d.nick ?? trimmed } : u));
       setToast("保存成功");
     } catch (e) {
       console.error("update nickname failed", e);
@@ -209,13 +212,64 @@ export default function ProfilePage() {
     }
   };
 
+  const onPickAvatar = () => fileRef.current?.click();
+
+  const handleAvatar = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (!/(image\/jpeg|image\/png|image\/webp)/.test(file.type)) {
+      setToast("仅支持 JPG/PNG/WEBP 格式");
+      return;
+    }
+    if (file.size > 2 * 1024 * 1024) {
+      setToast("图片过大，请压缩后再试（≤2MB）");
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = async () => {
+      try {
+        setUploading(true);
+        const base64 = reader.result;
+        const r = await meApi.patch({ avatar: base64 });
+        const d = r?.data ?? r ?? {};
+        const newAvatar = d.avatar ?? base64;
+        setAvatar(newAvatar);
+        setUser((u) => (u ? { ...u, avatar: newAvatar } : u));
+        setToast("上传成功");
+      } catch (err) {
+        console.error("upload avatar failed", err);
+        setToast("上传失败，请稍后重试");
+      } finally {
+        setUploading(false);
+      }
+    };
+    reader.readAsDataURL(file);
+  };
+
   return (
     <div className="max-w-[1100px] mx-auto px-4 py-6">
       <Toast message={toast} onClose={() => setToast("")} />
 
       {/* 顶部：头像 + 昵称 */}
       <div className="flex items-center gap-4">
-        <img src={displayAvatar} className="w-20 h-20 rounded-full" />
+        <div className="relative">
+          <img src={displayAvatar} className="w-20 h-20 rounded-full object-cover" />
+          <button
+            type="button"
+            onClick={onPickAvatar}
+            className="absolute bottom-0 right-0 px-2 py-1 text-xs rounded-full border bg-white/80"
+            style={{ borderColor: THEME.border }}
+          >
+            更换
+          </button>
+          <input
+            ref={fileRef}
+            type="file"
+            accept="image/png,image/jpeg,image/webp"
+            className="hidden"
+            onChange={handleAvatar}
+          />
+        </div>
         <div>
           <div className="text-xl font-semibold">{nick}</div>
           <div className="text-gray-500 text-sm">我的主页</div>
