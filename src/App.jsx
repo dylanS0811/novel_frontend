@@ -10,6 +10,7 @@ import ProfilePage from "./pages/ProfilePage";
 import BookshelfPage from "./pages/BookshelfPage";
 import UserProfilePage from "./pages/UserProfilePage";
 import UploadDrawer from "./components/modals/UploadDrawer";
+import EditBookDrawer from "./components/modals/EditBookDrawer";
 import DetailModal from "./components/modals/DetailModal";
 import CommentsDrawer from "./components/modals/CommentsDrawer";
 import AuthModal from "./components/modals/AuthModal";
@@ -40,6 +41,8 @@ function Shell() {
     setAuthOpen,
     notifyOpen,
     setNotifyOpen,
+    editingBook,
+    setEditingBook,
     setPage,
     user,
   } = useAppStore();
@@ -130,6 +133,11 @@ function Shell() {
         open={showUpload}
         onClose={() => setShowUpload(false)}
         onSubmit={onSubmitUpload}
+      />
+      <EditBookDrawer
+        open={!!editingBook}
+        bookId={editingBook?.id}
+        onClose={() => setEditingBook(null)}
       />
       <DetailModal open={!!detail} onClose={() => setDetail(null)} item={detail} />
 

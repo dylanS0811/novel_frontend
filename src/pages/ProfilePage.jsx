@@ -92,7 +92,7 @@ function Toast({ message, onClose }) {
 
 /** 内联组件：我的书架分区（供本页与 BookshelfPage 复用） */
 export function BookshelfSection() {
-  const { items, savedIds, nick, toggleSave, setCommentsOpen } = useAppStore();
+  const { items, savedIds, nick, toggleSave, setCommentsOpen, setEditingBook } = useAppStore();
   const [tab, setTab] = useState("fav"); // fav | rec | sheet
 
   const favorites = items.filter((i) => savedIds.has(i.id));
@@ -152,6 +152,7 @@ export function BookshelfSection() {
               onOpenDetail={() => {}}
               onOpenComments={() => setCommentsOpen({ open: true, item })}
               onOpenUser={() => {}}
+              onEdit={() => setEditingBook(item)}
             />
           ))}
           {list.length === 0 && <div className="text-sm text-gray-500">暂无内容</div>}

@@ -7,7 +7,7 @@ import { useAppStore } from "../store/AppStore";
 export default function UserProfilePage() {
   const { nick } = useParams();
   const displayNick = decodeURIComponent(nick || "");
-  const { items } = useAppStore();
+  const { items, setEditingBook } = useAppStore();
 
   // 从后端列表中过滤出 TA 推荐的书
   const recs = (items || []).filter((i) => {
@@ -45,6 +45,7 @@ export default function UserProfilePage() {
             onOpenDetail={() => {}}
             onOpenComments={() => {}}
             onOpenUser={() => {}}
+            onEdit={() => setEditingBook(item)}
           />
         ))}
         {recs.length === 0 && (
