@@ -10,70 +10,86 @@ import { useUpdateBook } from "../../api/hooks";
 
 // 简易 Toast（沿用 UploadDrawer 的样式）
 function Toast({ message = "", type = "success", onClose }) {
+  const [show, setShow] = useState(false);
+
   useEffect(() => {
     if (!message) return;
-    const t = setTimeout(onClose, 2000);
+    setShow(true);
+    const t = setTimeout(() => setShow(false), 2000);
     return () => clearTimeout(t);
-  }, [message, onClose]);
+  }, [message]);
 
-  if (!message) return null;
   const ok = type === "success";
+
+  if (!message && !show) return null;
+
   return (
-    <div
-      style={{
-        position: "fixed",
-        top: 18,
-        left: "50%",
-        transform: "translateX(-50%)",
-        zIndex: 99999,
-        padding: 2,
-        borderRadius: 14,
-        background: ok
-          ? "linear-gradient(135deg, rgba(251,113,133,0.45), rgba(244,114,182,0.45))"
-          : "linear-gradient(135deg, rgba(248,113,113,0.45), rgba(239,68,68,0.45))",
-        boxShadow: "0 14px 30px rgba(244,114,182,0.25)",
-      }}
-    >
-      <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          gap: 8,
-          padding: "10px 14px",
-          borderRadius: 12,
-          background: "rgba(255,255,255,0.78)",
-          backdropFilter: "saturate(130%) blur(8px)",
-          WebkitBackdropFilter: "saturate(130%) blur(8px)",
-          border: "1px solid rgba(255,255,255,0.65)",
-          fontSize: 14,
-          color: "#3f3f46",
-          minWidth: 120,
-          justifyContent: "center",
-        }}
-      >
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-          <circle cx="12" cy="12" r="10" fill={ok ? "url(#g1)" : "url(#g2)"} />
-          <path
-            d={ok ? "M8.5 12.5l2.2 2.2 4.8-5.2" : "M8 8l8 8M16 8l-8 8"}
-            stroke="white"
-            strokeWidth="1.8"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
-          <defs>
-            <linearGradient id="g1" x1="4" y1="4" x2="20" y2="20">
-              <stop stopColor="#FB7185" />
-              <stop offset="1" stopColor="#F472B6" />
-            </linearGradient>
-            <linearGradient id="g2" x1="4" y1="4" x2="20" y2="20">
-              <stop stopColor="#f43f5e" />
-              <stop offset="1" stopColor="#ef4444" />
-            </linearGradient>
-          </defs>
-        </svg>
-        <span style={{ fontWeight: 600 }}>{message}</span>
-      </div>
-    </div>
+    <AnimatePresence>
+      {show && (
+        <motion.div
+          initial={{ y: -12, opacity: 0, scale: 0.98 }}
+          animate={{ y: 0, opacity: 1, scale: 1 }}
+          exit={{ y: -8, opacity: 0, scale: 0.98 }}
+          transition={{ type: "spring", stiffness: 500, damping: 32, mass: 0.6 }}
+          onAnimationComplete={() => {
+            if (!show) onClose && onClose();
+          }}
+          style={{
+            position: "fixed",
+            top: 18,
+            left: "50%",
+            transform: "translateX(-50%)",
+            zIndex: 99999,
+            padding: 2,
+            borderRadius: 14,
+            background: ok
+              ? "linear-gradient(135deg, rgba(251,113,133,0.45), rgba(244,114,182,0.45))"
+              : "linear-gradient(135deg, rgba(248,113,113,0.45), rgba(239,68,68,0.45))",
+            boxShadow: "0 14px 30px rgba(244,114,182,0.25)",
+          }}
+        >
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: 8,
+              padding: "10px 14px",
+              borderRadius: 12,
+              background: "rgba(255,255,255,0.78)",
+              backdropFilter: "saturate(130%) blur(8px)",
+              WebkitBackdropFilter: "saturate(130%) blur(8px)",
+              border: "1px solid rgba(255,255,255,0.65)",
+              fontSize: 14,
+              color: "#3f3f46",
+              minWidth: 120,
+              justifyContent: "center",
+            }}
+          >
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+              <circle cx="12" cy="12" r="10" fill={ok ? "url(#g1)" : "url(#g2)"} />
+              <path
+                d={ok ? "M8.5 12.5l2.2 2.2 4.8-5.2" : "M8 8l8 8M16 8l-8 8"}
+                stroke="white"
+                strokeWidth="1.8"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+              <defs>
+                <linearGradient id="g1" x1="4" y1="4" x2="20" y2="20">
+                  <stop stopColor="#FB7185" />
+                  <stop offset="1" stopColor="#F472B6" />
+                </linearGradient>
+                <linearGradient id="g2" x1="4" y1="4" x2="20" y2="20">
+                  <stop stopColor="#f43f5e" />
+                  <stop offset="1" stopColor="#ef4444" />
+                </linearGradient>
+              </defs>
+            </svg>
+            <span style={{ fontWeight: 600 }}>{message}</span>
+          </div>
+        </motion.div>
+      )}
+    </AnimatePresence>
   );
 }
 
