@@ -10,9 +10,11 @@ export default function UserProfilePage() {
   const { items } = useAppStore();
 
   // 从后端列表中过滤出 TA 推荐的书
-  const recs = (items || []).filter(
-    (i) => i?.recommender?.nick === displayNick
-  );
+  const recs = (items || []).filter((i) => {
+    const r = i?.recommender;
+    const nick = r?.nick || r?.nickname;
+    return nick === displayNick;
+  });
 
   // 头像：优先用书卡里 recommender.avatar（若能命中），否则占位
   const avatarFromBooks =

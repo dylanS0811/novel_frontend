@@ -58,16 +58,17 @@ export const aggregateUserHeat = (items = [], mode = "champion", days = 30) => {
   const map = new Map(); // nick -> { nick, avatar, score }
 
   for (const it of items) {
-    if (!it?.recommender?.nick) continue;
+    const r = it?.recommender;
+    const nick = r?.nick || r?.nickname;
+    if (!nick) continue;
     const when = new Date(it.createdAt).getTime();
     if (when < since) continue;
 
-    const key = it.recommender.nick;
     const add = heatScore(it);
-    if (!map.has(key)) {
-      map.set(key, { nick: key, avatar: it.recommender.avatar, score: 0 });
+    if (!map.has(nick)) {
+      map.set(nick, { nick, avatar: r?.avatar, score: 0 });
     }
-    map.get(key).score += add;
+    map.get(nick).score += add;
   }
 
   return Array.from(map.values()).sort((a, b) => b.score - a.score);

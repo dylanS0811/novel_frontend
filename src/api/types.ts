@@ -19,7 +19,7 @@ export interface Book {
   bookmarks: number;
   comments: number;
   createdAt?: string; // 或 ISO
-  recommender?: { id: number; nick: string; avatar?: string };
+  recommender?: { id: number; nick?: string; nickname?: string; avatar?: string };
 }
 
 // —— 评论
