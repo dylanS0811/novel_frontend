@@ -4,7 +4,8 @@ import http from './http';
 // ---------------- 公共类型 ----------------
 export interface User {
   id: number;
-  nick: string;
+  nick?: string;
+  nickname?: string;
   avatar: string;
   phone?: string; // 适配后端可能返回手机号
 }
@@ -21,7 +22,7 @@ export interface BookSummary {
   bookmarks?: number;
   comments?: number;
   createdAt?: string | number;
-  recommender?: { id: number; nick: string; avatar?: string };
+  recommender?: { id: number; nick?: string; nickname?: string; avatar?: string };
 }
 
 export interface CommentItem {
@@ -62,9 +63,7 @@ export const uploadApi = {
   avatar: (file: File) => {
     const fd = new FormData();
     fd.append('file', file);
-    return http.post<{ url: string }>('/api/uploads/avatar', fd, {
-      headers: { 'Content-Type': 'multipart/form-data' },
-    });
+    return http.post<{ url: string }>('/api/uploads/avatar', fd);
   },
 };
 

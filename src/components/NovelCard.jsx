@@ -99,22 +99,27 @@ export default function NovelCard({
             <BadgeCheck className="w-4 h-4" />
             代言人
           </span>
-          {item?.recommender && (
-            <button
-              onClick={() => onOpenUser && onOpenUser(item.recommender)}
-              className="inline-flex items-center gap-1"
-              title="查看推荐人"
-            >
-              <img
-                src={item.recommender.avatar}
-                className="w-6 h-6 rounded-full ring-2 ring-white"
-                alt="avatar"
-              />
-              <span className="text-xs text-gray-700">
-                {item.recommender.nick}
-              </span>
-            </button>
-          )}
+          {(() => {
+            const rec = item?.recommender;
+            const recNick = rec?.nick || rec?.nickname;
+            if (!rec || !recNick) return null;
+            return (
+              <button
+                onClick={() =>
+                  onOpenUser && onOpenUser({ ...rec, nick: recNick })
+                }
+                className="inline-flex items-center gap-1"
+                title="查看推荐人"
+              >
+                <img
+                  src={rec.avatar}
+                  className="w-6 h-6 rounded-full ring-2 ring-white"
+                  alt="avatar"
+                />
+                <span className="text-xs text-gray-700">{recNick}</span>
+              </button>
+            );
+          })()}
         </div>
 
         <div className="p-4 h-full flex flex-col relative">

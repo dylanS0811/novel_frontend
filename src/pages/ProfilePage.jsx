@@ -96,7 +96,11 @@ export function BookshelfSection() {
   const [tab, setTab] = useState("fav"); // fav | rec | sheet
 
   const favorites = items.filter((i) => savedIds.has(i.id));
-  const myRecs = items.filter((i) => i?.recommender?.nick === nick);
+  const myRecs = items.filter((i) => {
+    const r = i?.recommender;
+    const recNick = r?.nick || r?.nickname;
+    return recNick === nick;
+  });
 
   const list = tab === "fav" ? favorites : myRecs;
 
