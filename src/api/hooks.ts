@@ -81,6 +81,20 @@ export const useCreateBook = () => {
   });
 };
 
+// 覆盖更新
+export const useUpdateBook = (id?: number) => {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (payload: Parameters<typeof bookApi.update>[1]) =>
+      bookApi.update(id as number, payload),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['book', id] });
+      qc.invalidateQueries({ queryKey: ['books'] });
+      qc.invalidateQueries({ queryKey: ['leaderboard'] });
+    },
+  });
+};
+
 // 更新
 export const usePatchBook = (id?: number) => {
   const qc = useQueryClient();

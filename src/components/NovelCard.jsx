@@ -16,6 +16,8 @@ import { THEME } from "../lib/theme";
 import { classNames, heatScore, formatDate, asArray } from "../lib/utils";
 import Chip from "./ui/Chip";
 import OriChip from "./ui/OriChip";
+import { Pencil } from "lucide-react";
+import { useAppStore } from "../store/AppStore";
 
 export default function NovelCard({
   item,
@@ -26,6 +28,7 @@ export default function NovelCard({
   onOpenDetail,
   onOpenComments,
   onOpenUser,
+  onEdit,
 }) {
   const wrapRef = useRef(null);
   const [showSummary, setShowSummary] = useState(false);
@@ -40,6 +43,12 @@ export default function NovelCard({
   const tags = asArray(item?.tags);
   const author = item?.author || "佚名";
   const createdAt = formatDate(item?.createdAt);
+  const { user } = useAppStore();
+  const isOwner =
+    user?.id &&
+    (item?.recommender?.id === user.id || item?.recommenderId === user.id);
+  const createdMs = new Date(item?.createdAt).getTime();
+  const within24h = Date.now() - createdMs < 24 * 3600 * 1000;
 
   // 数量以服务端为准（HomePage 里做乐观数量更新）
   const likes = Number(item?.likes ?? 0);
@@ -120,6 +129,26 @@ export default function NovelCard({
               </button>
             );
           })()}
+          {isOwner && (
+            <button
+              onClick={() => within24h && onEdit && onEdit(item)}
+              disabled={!within24h}
+              className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full border text-xs"
+              style={{
+                borderColor: THEME.border,
+                background: THEME.surface,
+                opacity: within24h ? 1 : 0.5,
+                cursor: within24h ? "pointer" : "not-allowed",
+              }}
+              title={
+                within24h
+                  ? "编辑"
+                  : "上传已超过 24 小时，不能再修改"
+              }
+            >
+              <Pencil className="w-3.5 h-3.5" /> 编辑
+            </button>
+          )}
         </div>
 
         <div className="p-4 h-full flex flex-col relative">

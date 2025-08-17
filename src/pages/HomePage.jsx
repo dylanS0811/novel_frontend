@@ -34,6 +34,7 @@ export default function HomePage() {
 
     // 分页
     page, size,
+    setEditingBook,
   } = useAppStore();
 
   // —— 拉取列表 —— //
@@ -167,6 +168,7 @@ export default function HomePage() {
                   onOpenDetail={() => nav(`/book/${encodeURIComponent(item.id)}`)}
                   onOpenComments={() => setCommentsOpen({ open: true, item })}
                   onOpenUser={(u) => nav(`/u/${encodeURIComponent(u.nick)}`)}
+                  onEdit={() => setEditingBook(item)}
                 />
               ))}
             </div>

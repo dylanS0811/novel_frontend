@@ -103,6 +103,7 @@ export function AppProvider({ children }) {
   const [detail, setDetail] = useState(null);
   const [commentsOpen, setCommentsOpen] = useState({ open: false, item: null });
   const [commentsMap, setCommentsMap] = useState({});
+  const [editingBook, setEditingBook] = useState(null);
 
   const [tab, setTab] = useState(DEFAULTS.tab);
   const [category, setCategory] = useState(DEFAULTS.category);
@@ -814,6 +815,8 @@ export function AppProvider({ children }) {
       commentsMap,
       addComment,
       toggleCommentLike,
+      editingBook,
+      setEditingBook,
 
       // 筛选
       tab,
@@ -891,6 +894,7 @@ export function AppProvider({ children }) {
       notifyOpen,
       unreadCount,
       moveBookToSheet,
+      editingBook,
     ]
   );
 
