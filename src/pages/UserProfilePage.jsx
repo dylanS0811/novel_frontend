@@ -1,12 +1,13 @@
 // 他人主页：只显示头像+昵称+Ta推荐的书（不可查看Ta收藏/书单）
 import React from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useLocation } from "react-router-dom";
 import NovelCard from "../components/NovelCard";
 import { useAppStore } from "../store/AppStore";
 
 export default function UserProfilePage() {
   const { nick } = useParams();
   const displayNick = decodeURIComponent(nick || "");
+  const location = useLocation();
   const { items, setEditingBook } = useAppStore();
 
   // 从后端列表中过滤出 TA 推荐的书
@@ -19,9 +20,11 @@ export default function UserProfilePage() {
   // 头像：优先用书卡里 recommender.avatar（若能命中），否则占位
   const avatarFromBooks =
     recs.find((i) => i?.recommender?.avatar)?.recommender?.avatar || null;
+  const avatarFromNav = location.state?.avatar;
   const user = {
     nick: displayNick,
-    avatar: avatarFromBooks || "https://i.pravatar.cc/80?img=24",
+    avatar:
+      avatarFromNav || avatarFromBooks || "https://i.pravatar.cc/80?img=24",
   };
 
   return (
