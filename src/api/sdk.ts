@@ -48,12 +48,24 @@ export const authApi = {
 // --------------- Me ----------------------
 export const meApi = {
   get: () => http.get<User>('/api/me'),
-  patch: (payload: { nickname?: string; avatar?: string }) =>
+  patch: (payload: { nickname?: string; avatar?: string; avatarUrl?: string }) =>
     http.patch<User>('/api/me', payload),
   checkNickname: (nickname: string) =>
     http.get<{ exists: boolean }>('/api/users/check-nickname', {
       params: { nickname },
     }),
+};
+
+// --------------- Uploads -----------------
+export const uploadApi = {
+  /** 上传头像文件，返回 URL */
+  avatar: (file: File) => {
+    const fd = new FormData();
+    fd.append('file', file);
+    return http.post<{ url: string }>('/api/uploads/avatar', fd, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    });
+  },
 };
 
 // --------------- Books -------------------

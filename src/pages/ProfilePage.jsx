@@ -9,7 +9,7 @@ import { classNames } from "../lib/utils";
 import NovelCard from "../components/NovelCard";
 import BookSheetPanel from "../components/BookSheetPanel";
 import { useAppStore } from "../store/AppStore";
-import { meApi } from "../api/sdk";
+import { meApi, uploadApi } from "../api/sdk";
 
 /** 顶部轻提示（2 秒后自动消失）- 玻璃拟物 + 渐变描边 */
 function Toast({ message, onClose }) {
@@ -164,6 +164,8 @@ export default function ProfilePage() {
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
   const fileRef = useRef(null);
+  const USE_FILE = import.meta.env.VITE_AVATAR_USE_FILE === 'true';
+  const [pendingUrl, setPendingUrl] = useState(null);
   const displayAvatar = avatar || "https://i.pravatar.cc/120?img=15";
 
   // 配置：昵称长度限制
@@ -198,12 +200,14 @@ export default function ProfilePage() {
         return;
       }
 
-      // 3) 保存
-      const r = await meApi.patch({ nickname: trimmed, avatar });
+      // 3) 保存（若有未提交的头像 URL 一并提交）
+      const payload = pendingUrl ? { nickname: trimmed, avatarUrl: pendingUrl } : { nickname: trimmed };
+      const r = await meApi.patch(payload);
       const d = r?.data ?? r ?? {};
       setNick(d.nick ?? trimmed);
       setUser((u) => (u ? { ...u, nick: d.nick ?? trimmed } : u));
       setToast("保存成功");
+      if (pendingUrl) setPendingUrl(null);
     } catch (e) {
       console.error("update nickname failed", e);
       setToast("保存失败");
@@ -225,25 +229,56 @@ export default function ProfilePage() {
       setToast("图片过大，请压缩后再试（≤2MB）");
       return;
     }
-    const reader = new FileReader();
-    reader.onload = async () => {
+
+    if (USE_FILE) {
       try {
         setUploading(true);
-        const base64 = reader.result;
-        const r = await meApi.patch({ avatar: base64 });
-        const d = r?.data ?? r ?? {};
-        const newAvatar = d.avatar ?? base64;
-        setAvatar(newAvatar);
-        setUser((u) => (u ? { ...u, avatar: newAvatar } : u));
-        setToast("上传成功");
+        const res = await uploadApi.avatar(file);
+        const url = res?.data?.url ?? res?.url;
+        if (!url) throw new Error('no url');
+        const tsUrl = `${url}?t=${Date.now()}`;
+        setAvatar(tsUrl);
+        setUser((u) => (u ? { ...u, avatar: tsUrl } : u));
+        setPendingUrl(url);
+        try {
+          await meApi.patch({ avatarUrl: url });
+          setPendingUrl(null);
+          setToast("上传成功");
+        } catch (err) {
+          console.error("patch avatar failed", err);
+          setToast("资料更新失败");
+        }
       } catch (err) {
         console.error("upload avatar failed", err);
-        setToast("上传失败，请稍后重试");
+        const status = err?.response?.status;
+        if (status === 413) setToast("图片过大");
+        else if (status === 415) setToast("类型不支持");
+        else if (status === 400) setToast(err?.response?.data?.message || "校验失败");
+        else setToast("上传失败，请稍后重试");
       } finally {
         setUploading(false);
       }
-    };
-    reader.readAsDataURL(file);
+    } else {
+      const reader = new FileReader();
+      reader.onload = async () => {
+        try {
+          setUploading(true);
+          const base64 = reader.result;
+          const r = await meApi.patch({ avatar: base64 });
+          const d = r?.data ?? r ?? {};
+          const newAvatar = d.avatar ?? base64;
+          setAvatar(newAvatar);
+          setUser((u) => (u ? { ...u, avatar: newAvatar } : u));
+          setToast("上传成功");
+        } catch (err) {
+          console.error("upload avatar failed", err);
+          setToast("上传失败，请稍后重试");
+        } finally {
+          setUploading(false);
+        }
+      };
+      reader.readAsDataURL(file);
+    }
   };
 
   return (
@@ -254,10 +289,16 @@ export default function ProfilePage() {
       <div className="flex items-center gap-4">
         <div className="relative">
           <img src={displayAvatar} className="w-20 h-20 rounded-full object-cover" />
+          {uploading && (
+            <div className="absolute inset-0 rounded-full flex items-center justify-center bg-black/50">
+              <Loader2 className="w-6 h-6 text-white animate-spin" />
+            </div>
+          )}
           <button
             type="button"
             onClick={onPickAvatar}
-            className="absolute bottom-0 right-0 px-2 py-1 text-xs rounded-full border bg-white/80"
+            disabled={uploading}
+            className="absolute bottom-0 right-0 px-2 py-1 text-xs rounded-full border bg-white/80 disabled:opacity-60"
             style={{ borderColor: THEME.border }}
           >
             更换
