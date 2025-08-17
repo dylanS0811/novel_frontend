@@ -431,7 +431,7 @@ export function AppProvider({ children }) {
         c?.data ||
         c || {
           id: Date.now(),
-          userName: nick,
+          nick,
           userAvatar: avatar || "https://i.pravatar.cc/80?img=15",
           text,
           createdAt: new Date().toISOString(),

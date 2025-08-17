@@ -21,13 +21,13 @@ export interface BookSummary {
   bookmarks?: number;
   comments?: number;
   createdAt?: string | number;
-  recommender?: { id: number; name: string; avatar?: string };
+  recommender?: { id: number; nick: string; avatar?: string };
 }
 
 export interface CommentItem {
   id: number;
   userId: number;
-  userName: string;
+  nick: string;
   userAvatar?: string;
   text: string;
   createdAt: string | number;
@@ -225,7 +225,7 @@ export interface NotificationItem {
   read: boolean;
   createdAt: string | number;
   /** 触发者 */
-  actor?: { id: number; name: string; avatar?: string };
+  actor?: { id: number; nick: string; avatar?: string };
   /** 关联书籍/评论 ID */
   bookId?: number;
   bookTitle?: string;
