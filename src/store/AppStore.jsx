@@ -64,6 +64,26 @@ function findCommentDepth(arr = [], targetId, depth = 0) {
   return -1;
 }
 
+// 后端通知类型 -> 前端类型映射 & 规范化
+const NOTIFICATION_TYPE_MAP = {
+  BOOK_LIKED: "like",
+  BOOK_BOOKMARKED: "bookmark",
+  BOOK_COMMENTED: "comment",
+  COMMENT_REPLIED: "reply",
+  COMMENT_LIKED: "comment_like",
+  BOOK_MENTIONED: "mention",
+  SYSTEM: "system",
+  ACHIEVEMENT_UNLOCKED: "achievement",
+};
+
+function normalizeNotification(n = {}) {
+  return {
+    ...n,
+    type: NOTIFICATION_TYPE_MAP[n.type] || n.type?.toLowerCase(),
+    bookTitle: n.bookTitle || n.title,
+  };
+}
+
 export function AppProvider({ children }) {
   const [nick, setNick] = useState("一颗麦穗");
   const [avatar, setAvatar] = useState("");
@@ -695,7 +715,8 @@ export function AppProvider({ children }) {
         const res = await notificationApi.list({ userId: user.id, page: 1, size: 20 });
         const data = res?.data || res || {};
         const list = data.list ?? data.items ?? [];
-        if (!aborted) setNotifications(list);
+        const mapped = list.map(normalizeNotification);
+        if (!aborted) setNotifications(mapped);
       } catch (e) {
         console.error("load notifications failed", e);
       }
@@ -714,7 +735,8 @@ export function AppProvider({ children }) {
         const res = await notificationApi.list({ userId: user.id, page: 1, size: 20 });
         const data = res?.data || res || {};
         const list = data.list ?? data.items ?? [];
-        if (!aborted) setNotifications(list);
+        const mapped = list.map(normalizeNotification);
+        if (!aborted) setNotifications(mapped);
       } catch (e) {
         console.error("load notifications failed", e);
       }

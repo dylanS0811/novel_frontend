@@ -34,6 +34,7 @@ export interface Comment {
   userId: number;
   nick?: string;
   name?: string;
+  userName?: string;
   userAvatar?: string;
   text: string;
   createdAt: string;
