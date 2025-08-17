@@ -111,7 +111,7 @@ export default function NovelCard({
                 alt="avatar"
               />
               <span className="text-xs text-gray-700">
-                {item.recommender.name}
+                {item.recommender.nick}
               </span>
             </button>
           )}

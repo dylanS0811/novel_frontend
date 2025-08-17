@@ -28,7 +28,7 @@ export const BASE_ITEMS = [
     likes: 134,
     bookmarks: 56,
     comments: 3,
-    recommender: { name: "谷雨", avatar: "https://i.pravatar.cc/80?img=32", count: 3 },
+    recommender: { nick: "谷雨", avatar: "https://i.pravatar.cc/80?img=32", count: 3 },
   },
   {
     id: "seed-2",
@@ -43,7 +43,7 @@ export const BASE_ITEMS = [
     likes: 92,
     bookmarks: 35,
     comments: 2,
-    recommender: { name: "麦穗", avatar: "https://i.pravatar.cc/80?img=12", count: 4 },
+    recommender: { nick: "麦穗", avatar: "https://i.pravatar.cc/80?img=12", count: 4 },
   },
   {
     id: "seed-3",
@@ -58,7 +58,7 @@ export const BASE_ITEMS = [
     likes: 61,
     bookmarks: 40,
     comments: 1,
-    recommender: { name: "小仓鼠", avatar: "https://i.pravatar.cc/80?img=5", count: 1 },
+    recommender: { nick: "小仓鼠", avatar: "https://i.pravatar.cc/80?img=5", count: 1 },
   },
 ];
 
@@ -85,7 +85,7 @@ export function genMock(n = 18) {
       bookmarks: rint(0, 120),
       comments: rint(0, 50),
       recommender: {
-        name: ["谷雨","麦穗","小仓鼠","长夜灯","风栖"][rint(0, 4)],
+        nick: ["谷雨","麦穗","小仓鼠","长夜灯","风栖"][rint(0, 4)],
         avatar: `https://i.pravatar.cc/80?img=${rint(1, 60)}`,
         count: rint(1, 5),
       },
@@ -97,14 +97,14 @@ export function genMock(n = 18) {
 export const MOCK_ITEMS = [...BASE_ITEMS, ...genMock(18)];
 
 export const MOCK_LEADERS = [
-  { name: "谷雨", score: 981, avatar: "https://i.pravatar.cc/80?img=32" },
-  { name: "麦穗", score: 864, avatar: "https://i.pravatar.cc/80?img=12" },
-  { name: "小仓鼠", score: 733, avatar: "https://i.pravatar.cc/80?img=5" },
-  { name: "长夜灯", score: 512, avatar: "https://i.pravatar.cc/80?img=14" },
-  { name: "风栖", score: 401, avatar: "https://i.pravatar.cc/80?img=23" },
-  { name: "白梅", score: 355, avatar: "https://i.pravatar.cc/80?img=37" },
-  { name: "清岚", score: 322, avatar: "https://i.pravatar.cc/80?img=21" },
-  { name: "拾荒人", score: 305, avatar: "https://i.pravatar.cc/80?img=44" },
-  { name: "芒果冰", score: 292, avatar: "https://i.pravatar.cc/80?img=9" },
-  { name: "溪水", score: 280, avatar: "https://i.pravatar.cc/80?img=28" },
+  { nick: "谷雨", score: 981, avatar: "https://i.pravatar.cc/80?img=32" },
+  { nick: "麦穗", score: 864, avatar: "https://i.pravatar.cc/80?img=12" },
+  { nick: "小仓鼠", score: 733, avatar: "https://i.pravatar.cc/80?img=5" },
+  { nick: "长夜灯", score: 512, avatar: "https://i.pravatar.cc/80?img=14" },
+  { nick: "风栖", score: 401, avatar: "https://i.pravatar.cc/80?img=23" },
+  { nick: "白梅", score: 355, avatar: "https://i.pravatar.cc/80?img=37" },
+  { nick: "清岚", score: 322, avatar: "https://i.pravatar.cc/80?img=21" },
+  { nick: "拾荒人", score: 305, avatar: "https://i.pravatar.cc/80?img=44" },
+  { nick: "芒果冰", score: 292, avatar: "https://i.pravatar.cc/80?img=9" },
+  { nick: "溪水", score: 280, avatar: "https://i.pravatar.cc/80?img=28" },
 ];

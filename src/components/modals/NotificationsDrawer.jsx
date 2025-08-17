@@ -126,7 +126,7 @@ export default function NotificationsDrawer({ open, onClose }) {
   };
 
   const renderText = (n) => {
-    const who = n.actor?.name || "有人";
+    const who = n.actor?.nick || "有人";
     const book = n.bookTitle || "作品";
     const excerpt = n.content || "";
     switch (n.type) {
@@ -281,7 +281,7 @@ export default function NotificationsDrawer({ open, onClose }) {
                   {n.actor?.avatar ? (
                     <img
                       src={n.actor.avatar}
-                      alt="avatar"
+                      alt={n.actor?.nick || "avatar"}
                       className="w-8 h-8 rounded-full"
                     />
                   ) : (
