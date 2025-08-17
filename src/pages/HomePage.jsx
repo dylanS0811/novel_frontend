@@ -167,7 +167,11 @@ export default function HomePage() {
                   onToggleSave={() => handleToggleSave(item)} // 再次点击即取消
                   onOpenDetail={() => nav(`/book/${encodeURIComponent(item.id)}`)}
                   onOpenComments={() => setCommentsOpen({ open: true, item })}
-                  onOpenUser={(u) => nav(`/u/${encodeURIComponent(u.nick)}`)}
+                  onOpenUser={(u) =>
+                    nav(`/u/${encodeURIComponent(u.nick)}`, {
+                      state: { avatar: u.avatar },
+                    })
+                  }
                   onEdit={() => setEditingBook(item)}
                 />
               ))}
@@ -179,7 +183,11 @@ export default function HomePage() {
         <div className="lg:col-span-3 space-y-4">
           <Leaderboard
             items={viewItems}
-            onOpenUser={(u) => nav(`/u/${encodeURIComponent(u.nick)}`)}
+            onOpenUser={(u) =>
+              nav(`/u/${encodeURIComponent(u.nick)}`, {
+                state: { avatar: u.avatar },
+              })
+            }
           />
         </div>
       </main>
