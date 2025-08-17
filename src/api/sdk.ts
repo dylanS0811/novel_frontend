@@ -4,6 +4,7 @@ import http from './http';
 // ---------------- 公共类型 ----------------
 export interface User {
   id: number;
+  name?: string;
   nick?: string;
   nickname?: string;
   avatar: string;
@@ -22,13 +23,20 @@ export interface BookSummary {
   bookmarks?: number;
   comments?: number;
   createdAt?: string | number;
-  recommender?: { id: number; nick?: string; nickname?: string; avatar?: string };
+  recommender?: {
+    id: number;
+    name?: string;
+    nick?: string;
+    nickname?: string;
+    avatar?: string;
+  };
 }
 
 export interface CommentItem {
   id: number;
   userId: number;
-  nick: string;
+  nick?: string;
+  name?: string;
   userAvatar?: string;
   text: string;
   createdAt: string | number;

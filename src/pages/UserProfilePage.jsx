@@ -12,7 +12,7 @@ export default function UserProfilePage() {
   // 从后端列表中过滤出 TA 推荐的书
   const recs = (items || []).filter((i) => {
     const r = i?.recommender;
-    const nick = r?.nick || r?.nickname;
+    const nick = r?.name || r?.nick || r?.nickname;
     return nick === displayNick;
   });
 

@@ -98,7 +98,7 @@ export function BookshelfSection() {
   const favorites = items.filter((i) => savedIds.has(i.id));
   const myRecs = items.filter((i) => {
     const r = i?.recommender;
-    const recNick = r?.nick || r?.nickname;
+    const recNick = r?.name || r?.nick || r?.nickname;
     return recNick === nick;
   });
 
@@ -205,8 +205,8 @@ export default function ProfilePage() {
       // 3) 保存
       const r = await meApi.patch({ nickname: trimmed });
       const d = r?.data ?? r ?? {};
-      setNick(d.nick ?? trimmed);
-      setUser((u) => (u ? { ...u, nick: d.nick ?? trimmed } : u));
+      setNick(d.nick ?? d.name ?? trimmed);
+      setUser((u) => (u ? { ...u, nick: d.nick ?? d.name ?? trimmed } : u));
       setToast("保存成功");
     } catch (e) {
       console.error("update nickname failed", e);

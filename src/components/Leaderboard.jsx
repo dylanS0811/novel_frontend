@@ -103,7 +103,7 @@ export default function Leaderboard({ items = [], onOpenUser, fetcher }) {
 
         <div className="space-y-3">
           {list.map((u, i) => {
-            const displayNick = u.nick || u.name;
+            const displayNick = u.name || u.nick;
             return (
               <button
                 key={(displayNick || "u") + i}

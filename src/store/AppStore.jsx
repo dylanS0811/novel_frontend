@@ -112,7 +112,7 @@ export function AppProvider({ children }) {
       const u = d.user || {};
       const mapped = {
         id: u.id ?? 1,
-        nick: u.nick ?? nick ?? "新用户",
+        nick: u.nick ?? u.name ?? u.nickname ?? nick ?? "新用户",
         avatar: u.avatar ?? "https://i.pravatar.cc/80?img=15",
       };
       setUser(mapped);
@@ -545,7 +545,7 @@ export function AppProvider({ children }) {
     if (cached) {
       try {
         const u = JSON.parse(cached);
-        if (u.nick) setNick(u.nick);
+        if (u.nick || u.name || u.nickname) setNick(u.nick || u.name || u.nickname);
         if (u.avatar) setAvatar(u.avatar);
         setUser(u);
       } catch {}
@@ -556,12 +556,12 @@ export function AppProvider({ children }) {
         const r = await meApi.get();
         const d = r?.data || r || {};
         if (!mounted) return;
-        if (d.nick) setNick(d.nick);
+        if (d.nick || d.name || d.nickname) setNick(d.nick || d.name || d.nickname);
         if (d.avatar) setAvatar(d.avatar);
         if (d.id)
           setUser({
             id: d.id,
-            nick: d.nick ?? nick,
+            nick: d.nick ?? d.name ?? d.nickname ?? nick,
             avatar: d.avatar ?? avatar,
             phone: d.phone,
           });
