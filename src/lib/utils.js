@@ -59,7 +59,7 @@ export const aggregateUserHeat = (items = [], mode = "champion", days = 30) => {
 
   for (const it of items) {
     const r = it?.recommender;
-    const nick = r?.nick || r?.nickname;
+    const nick = r?.name || r?.nick || r?.nickname;
     if (!nick) continue;
     const when = new Date(it.createdAt).getTime();
     if (when < since) continue;

@@ -56,12 +56,12 @@ export default function CommentsDrawer({ open, onClose, item, list, onAdd, onLik
       >
         <img
           src={c.userAvatar || "/default-avatar.png"}
-          alt={c.nick}
+          alt={c.nick || c.name || "avatar"}
           className="w-7 h-7 rounded-full object-cover bg-gray-200"
         />
         <div className="flex-1">
           <div className="text-sm">
-            <span className="font-medium mr-2">{c.nick || "匿名用户"}</span>
+            <span className="font-medium mr-2">{c.nick || c.name || "匿名用户"}</span>
             <span className="text-gray-400">{formatDate(c.createdAt)}</span>
           </div>
           <div className="text-sm mt-0.5">{c.text}</div>

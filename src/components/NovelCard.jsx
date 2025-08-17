@@ -101,7 +101,7 @@ export default function NovelCard({
           </span>
           {(() => {
             const rec = item?.recommender;
-            const recNick = rec?.nick || rec?.nickname;
+            const recNick = rec?.name || rec?.nick || rec?.nickname;
             if (!rec || !recNick) return null;
             return (
               <button
@@ -114,7 +114,7 @@ export default function NovelCard({
                 <img
                   src={rec.avatar}
                   className="w-6 h-6 rounded-full ring-2 ring-white"
-                  alt="avatar"
+                  alt={recNick}
                 />
                 <span className="text-xs text-gray-700">{recNick}</span>
               </button>

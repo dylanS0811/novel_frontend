@@ -68,7 +68,12 @@ function Shell() {
       likes: 0,
       bookmarks: 0,
       comments: 0,
-      recommender: { nick: nick, avatar: "https://i.pravatar.cc/80?img=15", count: 1 },
+      recommender: {
+        name: nick,
+        nick: nick,
+        avatar: "https://i.pravatar.cc/80?img=15",
+        count: 1,
+      },
     };
     setItems((arr) => [newItem, ...arr]);
     setShowUpload(false);
