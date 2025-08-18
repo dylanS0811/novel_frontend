@@ -139,9 +139,9 @@ export default function HomePage() {
         setOrientation={setOrientation}
       />
 
-      <main className="max-w-[1200px] mx-auto px-4 pt-4 grid grid-cols-1 lg:grid-cols-12 gap-5">
+      <main className="max-w-[1200px] mx-auto px-4 pt-4 grid grid-cols-1 lg:grid-cols-[1fr,300px] gap-5">
         {/* 左侧：卡片 */}
-        <div className="lg:col-span-9">
+        <div>
           <div className="mb-2 text-sm text-gray-600">
             当前：
             <b>{tab === "hot" ? "热榜（点赞降序）" : "新粮（时间倒序）"}</b>
@@ -159,7 +159,7 @@ export default function HomePage() {
               或检查来源数据是否缺少必填字段（title/category/orientation）。
             </div>
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 xl:gap-5">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 xl:gap-5">
               {viewItems.map((item) => (
                 <NovelCard
                   key={item.id || item.title}
@@ -183,7 +183,7 @@ export default function HomePage() {
         </div>
 
         {/* 右侧：排行榜（Top 10）桌面端显示 */}
-        <div className="hidden lg:block lg:col-span-3 space-y-4">
+        <div className="hidden lg:block space-y-4">
           <Leaderboard
             items={viewItems}
             onOpenUser={(u) =>

@@ -1,5 +1,5 @@
 // src/components/BookSheetPanel.jsx
-import React, { useMemo, useState } from "react";
+import React, { useMemo, useState, useEffect } from "react";
 import { useAppStore } from "../store/AppStore";
 import { THEME } from "../lib/theme";
 import { classNames, formatDate } from "../lib/utils";
@@ -33,6 +33,7 @@ export default function BookSheetPanel() {
     updateBookInSheet,
     removeBookFromSheet,
     moveBookToSheet,
+    setFabHidden,
   } = useAppStore();
 
   // 当前激活书单
@@ -63,6 +64,27 @@ export default function BookSheetPanel() {
   const [editingBook, setEditingBook] = useState(null);
   const [moveModalOpen, setMoveModalOpen] = useState(false);
   const [movingBook, setMovingBook] = useState(null);
+
+  // 打开任意编辑弹层时隐藏右下角 + 按钮
+  useEffect(() => {
+    setFabHidden(
+      listFormOpen ||
+        bookFormOpen ||
+        moveModalOpen ||
+        confirmOpen ||
+        !!editingSheet ||
+        !!editingBook
+    );
+    return () => setFabHidden(false);
+  }, [
+    listFormOpen,
+    bookFormOpen,
+    moveModalOpen,
+    confirmOpen,
+    editingSheet,
+    editingBook,
+    setFabHidden,
+  ]);
 
   // ===== 书单：新增 / 重命名 =====
   const openCreateSheet = () => {
