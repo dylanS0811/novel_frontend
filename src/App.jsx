@@ -45,6 +45,7 @@ function Shell() {
     setEditingBook,
     setPage,
     user,
+    fabHidden,
   } = useAppStore();
 
   // 发布上传（保持原有本地插卡行为；UploadDrawer 里也已接上后端，二者兼容）
@@ -107,8 +108,8 @@ function Shell() {
       <Outlet />
       <Footer />
 
-      {/* 右下角悬浮 + 按钮：当评论抽屉打开时隐藏，避免遮挡输入框 */}
-      {!commentsOpen.open && (
+      {/* 右下角悬浮 + 按钮：编辑/评论/上传时隐藏，避免遮挡输入 */}
+      {!(commentsOpen.open || showUpload || editingBook || fabHidden) && (
         <button
           onClick={() => (user ? setShowUpload(true) : setAuthOpen(true))}
           title="闪电上传"
