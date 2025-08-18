@@ -1,6 +1,8 @@
 import React, { useState } from "react";
+import { Star } from "lucide-react";
 import BookHoverCard from "./BookHoverCard";
 import SheetBookDetailModal from "../modals/SheetBookDetailModal";
+import { classNames } from "../../lib/utils";
 
 /**
  * 右侧书籍“行式列表”的单行（纯 UI + 事件回调）
@@ -19,6 +21,7 @@ export default function BookListRow({ book = {}, onEdit, onDelete, onMove }) {
       : typeof book.score === "number"
       ? book.score
       : "";
+  const stars = Math.max(0, Math.min(5, Math.round((rating || 0) / 2)));
 
   // 兼容不同字段名：一句话推荐/简介
   const oneLine =
@@ -66,8 +69,17 @@ export default function BookListRow({ book = {}, onEdit, onDelete, onMove }) {
 
           <div className="truncate text-xs text-gray-500">/ {author}</div>
           {rating !== "" && (
-            <span className="ml-2 text-xs rounded-full bg-pink-50 text-pink-600 px-2 py-0.5">
-              ⭐ {rating}
+            <span className="ml-2 inline-flex items-center gap-1 text-xs rounded-full bg-pink-50 text-pink-600 px-2 py-0.5">
+              {Array.from({ length: 5 }).map((_, i) => (
+                <Star
+                  key={i}
+                  className={classNames(
+                    "w-3 h-3",
+                    i < stars ? "fill-current" : "text-pink-200"
+                  )}
+                />
+              ))}
+              <span className="ml-1">{rating}</span>
             </span>
           )}
         </div>

@@ -159,7 +159,7 @@ export default function HomePage() {
               或检查来源数据是否缺少必填字段（title/category/orientation）。
             </div>
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 xl:gap-5">
               {viewItems.map((item) => (
                 <NovelCard
                   key={item.id || item.title}
