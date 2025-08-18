@@ -109,7 +109,7 @@ export default function Leaderboard({ items = [], onOpenUser, fetcher }) {
                 key={(displayNick || "u") + i}
                 onClick={() =>
                   onOpenUser &&
-                  onOpenUser({ nick: displayNick, avatar: u.avatar })
+                  onOpenUser({ nick: displayNick, avatar: u.avatar, id: u.id })
                 }
                 className="w-full text-left flex items-center gap-3 rounded-xl px-2 py-2 transition"
                 style={{

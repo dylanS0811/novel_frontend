@@ -83,6 +83,7 @@ export type BooksQuery = {
   search?: string;
   tag?: string;
   recommender?: string;
+  recommenderId?: number;
   page?: number;
   size?: number;
 };

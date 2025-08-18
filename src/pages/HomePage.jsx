@@ -178,7 +178,7 @@ export default function HomePage() {
                     onOpenComments={() => setCommentsOpen({ open: true, item })}
                     onOpenUser={(u) =>
                       nav(`/u/${encodeURIComponent(u.nick)}`, {
-                        state: { avatar: u.avatar },
+                        state: { avatar: u.avatar, userId: u.id },
                       })
                     }
                     onEdit={() => setEditingBook(item)}
@@ -204,7 +204,7 @@ export default function HomePage() {
             items={viewItems}
             onOpenUser={(u) =>
               nav(`/u/${encodeURIComponent(u.nick)}`, {
-                state: { avatar: u.avatar },
+                state: { avatar: u.avatar, userId: u.id },
               })
             }
           />
@@ -227,7 +227,7 @@ export default function HomePage() {
               items={viewItems}
               onOpenUser={(u) =>
                 nav(`/u/${encodeURIComponent(u.nick)}`, {
-                  state: { avatar: u.avatar },
+                  state: { avatar: u.avatar, userId: u.id },
                 })
               }
             />
