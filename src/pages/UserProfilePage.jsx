@@ -14,12 +14,14 @@ export default function UserProfilePage() {
 
   const [page, setPage] = React.useState(1);
   const size = 20;
-  const { data: res, isLoading } = useBooks({
-    recommender: displayNick,
+  const userId = location.state?.userId;
+  const query = {
     page,
     size,
     tab: "new",
-  });
+    ...(userId ? { recommenderId: userId } : { recommender: displayNick }),
+  };
+  const { data: res, isLoading } = useBooks(query);
   const data = res?.data || res || {};
   const recs = data.list ?? data.items ?? [];
   const total = data.total ?? recs.length ?? 0;
