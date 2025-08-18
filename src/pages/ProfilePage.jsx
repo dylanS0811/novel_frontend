@@ -106,7 +106,7 @@ export function BookshelfSection() {
 
   return (
     <div className="mt-6">
-      <div className="flex gap-2 mb-4">
+      <div className="flex flex-wrap gap-2 mb-4">
         <button
           onClick={() => setTab("fav")}
           className={classNames(
@@ -142,7 +142,7 @@ export function BookshelfSection() {
       {tab === "sheet" ? (
         <BookSheetPanel />
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {list.map((item) => (
             <NovelCard
               key={item.id}
@@ -257,7 +257,7 @@ export default function ProfilePage() {
       <Toast message={toast} onClose={() => setToast("")} />
 
       {/* 顶部：头像 + 昵称 */}
-      <div className="flex items-center gap-4">
+      <div className="flex flex-col sm:flex-row items-center gap-4">
         <div className="relative">
           <img src={displayAvatar} className="w-20 h-20 rounded-full object-cover" />
           {uploading && (
@@ -282,7 +282,7 @@ export default function ProfilePage() {
             onChange={handleAvatar}
           />
         </div>
-        <div>
+        <div className="text-center sm:text-left">
           <div className="text-xl font-semibold">{nick}</div>
           <div className="text-gray-500 text-sm">我的主页</div>
         </div>

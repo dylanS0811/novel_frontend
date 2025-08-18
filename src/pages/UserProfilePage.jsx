@@ -29,16 +29,16 @@ export default function UserProfilePage() {
 
   return (
     <div className="max-w-[1100px] mx-auto px-4 py-6">
-      <div className="flex items-center gap-4">
+      <div className="flex flex-col sm:flex-row items-center gap-4">
         <img src={user.avatar} className="w-20 h-20 rounded-full" />
-        <div>
+        <div className="text-center sm:text-left">
           <div className="text-xl font-semibold">{user.nick}</div>
           <div className="text-gray-500 text-sm">仅展示：头像、昵称、TA推荐的书</div>
         </div>
       </div>
 
       <div className="mt-6 text-lg font-semibold">TA推荐的书（{recs.length}）</div>
-      <div className="mt-3 grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         {recs.map((item) => (
           <NovelCard
             key={item.id}
