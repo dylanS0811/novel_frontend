@@ -7,6 +7,7 @@ import { useAppStore } from "../store/AppStore";
 import FilterBar from "../components/FilterBar";
 import Leaderboard from "../components/Leaderboard";
 import NovelCard from "../components/NovelCard";
+import Pagination from "../components/Pagination";
 import { THEME } from "../lib/theme";
 
 // 用 hooks 拉取后端 /api/books
@@ -36,16 +37,20 @@ export default function HomePage() {
     search,
 
     // 分页
-    page, size,
+    page,
+    size,
+    setPage,
     setEditingBook,
   } = useAppStore();
 
   // —— 拉取列表 —— //
+  const isTagSearch = (search || "").startsWith("#");
   const { data: res, isLoading } = useBooks({
     tab,
     category: category === "全部" ? undefined : category,
     orientation: orientation === "全部" ? undefined : orientation,
-    search: search || undefined,
+    search: !isTagSearch && search ? search : undefined,
+    tag: isTagSearch ? search.slice(1) : undefined,
     page,
     size,
   });
@@ -159,26 +164,37 @@ export default function HomePage() {
               或检查来源数据是否缺少必填字段（title/category/orientation）。
             </div>
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 xl:gap-5">
-              {viewItems.map((item) => (
-                <NovelCard
-                  key={item.id || item.title}
-                  item={item}
-                  liked={hasId(likedIds, item.id)}            // ✅ 刷新后即可高亮
-                  saved={hasId(savedIds, item.id)}            // ✅ 刷新后即可高亮
-                  onLike={() => handleLike(item)}             // 再次点击即取消
-                  onToggleSave={() => handleToggleSave(item)} // 再次点击即取消
-                  onOpenDetail={() => nav(`/book/${encodeURIComponent(item.id)}`)}
-                  onOpenComments={() => setCommentsOpen({ open: true, item })}
-                  onOpenUser={(u) =>
-                    nav(`/u/${encodeURIComponent(u.nick)}`, {
-                      state: { avatar: u.avatar },
-                    })
-                  }
-                  onEdit={() => setEditingBook(item)}
-                />
-              ))}
-            </div>
+            <>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 xl:gap-5">
+                {viewItems.map((item) => (
+                  <NovelCard
+                    key={item.id || item.title}
+                    item={item}
+                    liked={hasId(likedIds, item.id)}            // ✅ 刷新后即可高亮
+                    saved={hasId(savedIds, item.id)}            // ✅ 刷新后即可高亮
+                    onLike={() => handleLike(item)}             // 再次点击即取消
+                    onToggleSave={() => handleToggleSave(item)} // 再次点击即取消
+                    onOpenDetail={() => nav(`/book/${encodeURIComponent(item.id)}`)}
+                    onOpenComments={() => setCommentsOpen({ open: true, item })}
+                    onOpenUser={(u) =>
+                      nav(`/u/${encodeURIComponent(u.nick)}`, {
+                        state: { avatar: u.avatar },
+                      })
+                    }
+                    onEdit={() => setEditingBook(item)}
+                  />
+                ))}
+              </div>
+              <Pagination
+                page={page}
+                size={size}
+                total={total}
+                onChange={(p) => {
+                  setPage(p);
+                  window.scrollTo({ top: 0, behavior: "smooth" });
+                }}
+              />
+            </>
           )}
         </div>
 

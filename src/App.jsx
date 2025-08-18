@@ -16,7 +16,7 @@ import CommentsDrawer from "./components/modals/CommentsDrawer";
 import AuthModal from "./components/modals/AuthModal";
 import NotificationsDrawer from "./components/modals/NotificationsDrawer";
 import { useAppStore } from "./store/AppStore";
-import { Plus } from "lucide-react";
+import { Plus, ArrowUp } from "lucide-react";
 import { THEME } from "./lib/theme";
 import { ToastHost } from "./components/ui/Toast";
 
@@ -47,6 +47,13 @@ function Shell() {
     user,
     fabHidden,
   } = useAppStore();
+
+  const [showTop, setShowTop] = React.useState(false);
+  React.useEffect(() => {
+    const onScroll = () => setShowTop(window.scrollY > 200);
+    window.addEventListener("scroll", onScroll);
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
 
   // 发布上传（保持原有本地插卡行为；UploadDrawer 里也已接上后端，二者兼容）
   const onSubmitUpload = ({
@@ -110,23 +117,42 @@ function Shell() {
 
       {/* 右下角悬浮 + 按钮：编辑/评论/上传时隐藏，避免遮挡输入 */}
       {!(commentsOpen.open || showUpload || editingBook || fabHidden) && (
-        <button
-          onClick={() => (user ? setShowUpload(true) : setAuthOpen(true))}
-          title="闪电上传"
-          className="fixed bottom-6 right-6 rounded-full shadow-lg flex items-center justify-center"
-          style={{
-            width: 56,
-            height: 56,
-            background:
-              "linear-gradient(135deg, #F86C8B 0%, #FFA2B6 60%, #FFD0DA 100%)",
-            boxShadow: THEME.shadowHover,
-            border: `1px solid ${THEME.border}`,
-            color: "#fff",
-            zIndex: 60,
-          }}
-        >
-          <Plus className="w-7 h-7" />
-        </button>
+        <>
+          {showTop && (
+            <button
+              onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+              title="返回顶部"
+              className="fixed right-6 rounded-full shadow-md flex items-center justify-center"
+              style={{
+                width: 40,
+                height: 40,
+                bottom: 80,
+                background: THEME.surface,
+                border: `1px solid ${THEME.border}`,
+                zIndex: 50,
+              }}
+            >
+              <ArrowUp className="w-5 h-5" />
+            </button>
+          )}
+          <button
+            onClick={() => (user ? setShowUpload(true) : setAuthOpen(true))}
+            title="闪电上传"
+            className="fixed bottom-6 right-6 rounded-full shadow-lg flex items-center justify-center"
+            style={{
+              width: 56,
+              height: 56,
+              background:
+                "linear-gradient(135deg, #F86C8B 0%, #FFA2B6 60%, #FFD0DA 100%)",
+              boxShadow: THEME.shadowHover,
+              border: `1px solid ${THEME.border}`,
+              color: "#fff",
+              zIndex: 60,
+            }}
+          >
+            <Plus className="w-7 h-7" />
+          </button>
+        </>
       )}
 
       {/* 全局弹层 */}

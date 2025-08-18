@@ -103,11 +103,14 @@ export default function Leaderboard({ items = [], onOpenUser, fetcher }) {
 
         <div className="space-y-3">
           {list.map((u, i) => {
-            const displayNick = u.name || u.nick;
+            const displayNick = u.nick || u.nickname || u.name;
             return (
               <button
                 key={(displayNick || "u") + i}
-                onClick={() => onOpenUser && onOpenUser({ nick: displayNick, avatar: u.avatar })}
+                onClick={() =>
+                  onOpenUser &&
+                  onOpenUser({ nick: displayNick, avatar: u.avatar })
+                }
                 className="w-full text-left flex items-center gap-3 rounded-xl px-2 py-2 transition"
                 style={{
                   background: i < 3 ? "rgba(254,243,199,0.45)" : "#FFFFFF",
