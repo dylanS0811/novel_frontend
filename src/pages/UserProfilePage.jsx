@@ -38,7 +38,7 @@ export default function UserProfilePage() {
       </div>
 
       <div className="mt-6 text-lg font-semibold">TA推荐的书（{recs.length}）</div>
-      <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+      <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-4">
         {recs.map((item) => (
           <NovelCard
             key={item.id}
