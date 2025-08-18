@@ -1,5 +1,5 @@
 // 筛选条（类别 & 性向）— 选中态更醒目，类别与性向使用不同的高亮色
-import React from "react";
+import React, { useState } from "react";
 import { THEME } from "../lib/theme";
 import { useAppStore } from "../store/AppStore";
 import { CATEGORIES, ORIENTATIONS } from "../lib/constants";
@@ -37,6 +37,8 @@ function Pill({ active, onClick, label, kind = "cat" }) {
 export default function FilterBar(props) {
   const store = useAppStore();
 
+  const [menuOpen, setMenuOpen] = useState(false);
+
   const category = props.category ?? store.category;
   const setCategory = props.setCategory ?? store.setCategory;
 
@@ -58,9 +60,9 @@ export default function FilterBar(props) {
     >
       <div className="max-w-[1200px] mx-auto px-4 py-3">
         {/* 类别 */}
-        <div className="flex items-center gap-3 flex-wrap">
+        <div className="flex items-center gap-3">
           <div className="text-sm text-gray-600 shrink-0">类别：</div>
-          <div className="flex items-center gap-2 flex-wrap">
+          <div className="flex items-center gap-2 overflow-x-auto flex-nowrap sm:flex-wrap sm:overflow-visible">
             {["全部", ...CATEGORIES].map((c) => (
               <Pill
                 key={c}
@@ -73,23 +75,48 @@ export default function FilterBar(props) {
           </div>
 
           {/* 右侧“重置” */}
-          <div className="ml-auto">
+          <div className="ml-auto relative">
             <button
               type="button"
               onClick={handleReset}
-              className="px-3 py-1.5 rounded-full border text-sm"
+              className="px-3 py-1.5 rounded-full border text-sm hidden sm:block"
               style={{ borderColor: THEME.border, background: THEME.surface }}
               title="清空筛选条件"
             >
               重置
             </button>
+            <button
+              type="button"
+              onClick={() => setMenuOpen((v) => !v)}
+              className="px-3 py-1.5 rounded-full border text-sm sm:hidden"
+              style={{ borderColor: THEME.border, background: THEME.surface }}
+            >
+              筛选
+            </button>
+            {menuOpen && (
+              <div
+                className="absolute right-0 mt-2 w-20 rounded-md border bg-white shadow-md"
+                style={{ borderColor: THEME.border }}
+              >
+                <button
+                  type="button"
+                  onClick={() => {
+                    handleReset();
+                    setMenuOpen(false);
+                  }}
+                  className="block w-full px-2 py-1 text-left text-sm hover:bg-gray-50"
+                >
+                  重置
+                </button>
+              </div>
+            )}
           </div>
         </div>
 
         {/* 性向 */}
-        <div className="mt-3 flex items-center gap-3 flex-wrap">
+        <div className="mt-3 flex items-center gap-3">
           <div className="text-sm text-gray-600 shrink-0">性向：</div>
-          <div className="flex items-center gap-2 flex-wrap">
+          <div className="flex items-center gap-2 overflow-x-auto flex-nowrap sm:flex-wrap sm:overflow-visible">
             {["全部", ...ORIENTATIONS].map((o) => (
               <Pill
                 key={o}
