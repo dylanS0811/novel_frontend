@@ -574,11 +574,13 @@ export function AppProvider({ children }) {
   const loadBooks = async () => {
     setLoadingList(true);
     try {
+      const isTagSearch = (search || "").startsWith("#");
       const res = await bookApi.list({
         tab,
         category: category === "全部" ? undefined : category,
         orientation: orientation === "全部" ? undefined : orientation,
-        search: search || undefined,
+        search: !isTagSearch && search ? search : undefined,
+        tag: isTagSearch ? search.slice(1) : undefined,
         page,
         size,
       });
@@ -654,11 +656,13 @@ export function AppProvider({ children }) {
     (async () => {
       setLoadingList(true);
       try {
+        const isTagSearch = (search || "").startsWith("#");
         const res = await bookApi.list({
           tab,
           category: category === "全部" ? undefined : category,
           orientation: orientation === "全部" ? undefined : orientation,
-          search: search || undefined,
+          search: !isTagSearch && search ? search : undefined,
+          tag: isTagSearch ? search.slice(1) : undefined,
           page,
           size,
         });

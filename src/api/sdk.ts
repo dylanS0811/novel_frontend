@@ -82,6 +82,7 @@ export type BooksQuery = {
   orientation?: string;
   search?: string;
   tag?: string;
+  recommender?: string;
   page?: number;
   size?: number;
 };
