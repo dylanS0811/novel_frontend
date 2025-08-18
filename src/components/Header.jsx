@@ -59,6 +59,15 @@ export default function Header(props) {
     if (!isHome) nav("/");
   };
 
+  useEffect(() => {
+    const t = setTimeout(() => {
+      store.setSearch((q || "").trim());
+      store.setPage(1);
+      if (!isHome) nav("/");
+    }, 300);
+    return () => clearTimeout(t);
+  }, [q, isHome, nav, store]);
+
   // 点击品牌：回首页 + 清空筛选/搜索 + 默认“新粮”
   const goHomeReset = () => {
     store.resetFilters();

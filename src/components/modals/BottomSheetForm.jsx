@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ORIENTATIONS, CATEGORIES } from "../../lib/constants";
+import CuteSelect from "../ui/CuteSelect";
 import { THEME } from "../../lib/theme";
 import { useAppStore } from "../../store/AppStore";
 
@@ -152,15 +153,11 @@ export default function BottomSheetForm({
                   </div>
                   <div>
                     <label className="block text-sm mb-1">可见性</label>
-                    <select
+                    <CuteSelect
                       value={form.visibility || "public"}
                       onChange={handleChange("visibility")}
-                      className="w-full border rounded-xl px-3 py-2"
-                      style={{ borderColor: THEME.border }}
-                    >
-                      <option value="public">公开</option>
-                      <option value="private">私密</option>
-                    </select>
+                      options={[{ label: "公开", value: "public" }, { label: "私密", value: "private" }]}
+                    />
                   </div>
                 </div>
               ) : (
@@ -189,33 +186,19 @@ export default function BottomSheetForm({
                   <div className="grid grid-cols-2 gap-3">
                     <div>
                       <label className="block text-sm mb-1">性向</label>
-                      <select
+                      <CuteSelect
                         value={form.orientation}
                         onChange={handleChange("orientation")}
-                        className="w-full border rounded-xl px-3 py-2"
-                        style={{ borderColor: THEME.border }}
-                      >
-                        {ORIENTATIONS.map((o) => (
-                          <option key={o} value={o}>
-                            {o}
-                          </option>
-                        ))}
-                      </select>
+                        options={ORIENTATIONS}
+                      />
                     </div>
                     <div>
                       <label className="block text-sm mb-1">类型</label>
-                      <select
+                      <CuteSelect
                         value={form.category}
                         onChange={handleChange("category")}
-                        className="w-full border rounded-xl px-3 py-2"
-                        style={{ borderColor: THEME.border }}
-                      >
-                        {CATEGORIES.map((c) => (
-                          <option key={c} value={c}>
-                            {c}
-                          </option>
-                        ))}
-                      </select>
+                        options={CATEGORIES}
+                      />
                     </div>
                   </div>
                   <div>
