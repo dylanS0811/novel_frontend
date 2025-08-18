@@ -1,5 +1,6 @@
 // 筛选条（类别 & 性向）— 选中态更醒目，类别与性向使用不同的高亮色
 import React, { useState } from "react";
+import { RotateCcw } from "lucide-react";
 import { THEME } from "../lib/theme";
 import { useAppStore } from "../store/AppStore";
 import { CATEGORIES, ORIENTATIONS } from "../lib/constants";
@@ -79,10 +80,11 @@ export default function FilterBar(props) {
             <button
               type="button"
               onClick={handleReset}
-              className="text-sm text-gray-500 hover:text-rose-500 hidden sm:block"
+              className="hidden sm:inline-flex items-center gap-1 px-3 py-1.5 rounded-full border border-rose-200 bg-rose-50 text-sm text-rose-500 hover:bg-rose-100 hover:text-rose-600 transition"
               title="清空筛选条件"
             >
-              重置
+              <RotateCcw className="w-4 h-4" />
+              <span>重置</span>
             </button>
             <button
               type="button"
@@ -94,7 +96,7 @@ export default function FilterBar(props) {
             </button>
             {menuOpen && (
               <div
-                className="absolute right-0 mt-2 w-20 rounded-md border bg-white shadow-md"
+                className="absolute right-0 mt-2 w-24 rounded-md border bg-white shadow-md p-2"
                 style={{ borderColor: THEME.border }}
               >
                 <button
@@ -103,9 +105,10 @@ export default function FilterBar(props) {
                     handleReset();
                     setMenuOpen(false);
                   }}
-                  className="block w-full px-2 py-1 text-left text-sm hover:bg-gray-50"
+                  className="w-full px-3 py-1.5 flex items-center justify-center gap-1 text-sm text-rose-500 rounded-full hover:bg-rose-50"
                 >
-                  重置
+                  <RotateCcw className="w-4 h-4" />
+                  <span>重置</span>
                 </button>
               </div>
             )}
