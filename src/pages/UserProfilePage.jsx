@@ -2,20 +2,27 @@
 import React from "react";
 import { useParams, useLocation } from "react-router-dom";
 import NovelCard from "../components/NovelCard";
+import Pagination from "../components/Pagination";
 import { useAppStore } from "../store/AppStore";
+import { useBooks } from "../api/hooks";
 
 export default function UserProfilePage() {
   const { nick } = useParams();
   const displayNick = decodeURIComponent(nick || "");
   const location = useLocation();
-  const { items, setEditingBook } = useAppStore();
+  const { setEditingBook } = useAppStore();
 
-  // 从后端列表中过滤出 TA 推荐的书
-  const recs = (items || []).filter((i) => {
-    const r = i?.recommender;
-    const nick = r?.name || r?.nick || r?.nickname;
-    return nick === displayNick;
+  const [page, setPage] = React.useState(1);
+  const size = 20;
+  const { data: res, isLoading } = useBooks({
+    recommender: displayNick,
+    page,
+    size,
+    tab: "new",
   });
+  const data = res?.data || res || {};
+  const recs = data.list ?? data.items ?? [];
+  const total = data.total ?? recs.length ?? 0;
 
   // 头像：优先用书卡里 recommender.avatar（若能命中），否则占位
   const avatarFromBooks =
@@ -37,24 +44,39 @@ export default function UserProfilePage() {
         </div>
       </div>
 
-      <div className="mt-6 text-lg font-semibold">TA推荐的书（{recs.length}）</div>
-      <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-4">
-        {recs.map((item) => (
-          <NovelCard
-            key={item.id}
-            item={item}
-            saved={false}
-            onToggleSave={() => {}}
-            onOpenDetail={() => {}}
-            onOpenComments={() => {}}
-            onOpenUser={() => {}}
-            onEdit={() => setEditingBook(item)}
+      <div className="mt-6 text-lg font-semibold">TA推荐的书（{total}）</div>
+      {isLoading ? (
+        <div className="mt-3 text-sm text-gray-500">加载中...</div>
+      ) : (
+        <>
+          <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {recs.map((item) => (
+              <NovelCard
+                key={item.id}
+                item={item}
+                saved={false}
+                onToggleSave={() => {}}
+                onOpenDetail={() => {}}
+                onOpenComments={() => {}}
+                onOpenUser={() => {}}
+                onEdit={() => setEditingBook(item)}
+              />
+            ))}
+            {recs.length === 0 && (
+              <div className="text-sm text-gray-500">暂无推荐</div>
+            )}
+          </div>
+          <Pagination
+            page={page}
+            size={size}
+            total={total}
+            onChange={(p) => {
+              setPage(p);
+              window.scrollTo({ top: 0, behavior: "smooth" });
+            }}
           />
-        ))}
-        {recs.length === 0 && (
-          <div className="text-sm text-gray-500">暂无推荐</div>
-        )}
-      </div>
+        </>
+      )}
     </div>
   );
 }
