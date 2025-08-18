@@ -55,6 +55,7 @@ export default function Header(props) {
   const [q, setQ] = useState(store.search || "");
   const triggerSearch = () => {
     store.setSearch((q || "").trim());
+    store.setPage(1);
     if (!isHome) nav("/");
   };
 
