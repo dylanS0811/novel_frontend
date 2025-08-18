@@ -20,6 +20,9 @@ export default function HomePage() {
   const likePending = React.useRef(new Set());
   const bookmarkPending = React.useRef(new Set());
 
+  // 小屏下排行榜折叠开关
+  const [showLeaderboard, setShowLeaderboard] = React.useState(false);
+
   const {
     // 我已点赞/收藏（用于高亮 & 判断增减）
     likedIds, toggleLike,
@@ -156,7 +159,7 @@ export default function HomePage() {
               或检查来源数据是否缺少必填字段（title/category/orientation）。
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
               {viewItems.map((item) => (
                 <NovelCard
                   key={item.id || item.title}
@@ -179,8 +182,8 @@ export default function HomePage() {
           )}
         </div>
 
-        {/* 右侧：排行榜（Top 10） */}
-        <div className="lg:col-span-3 space-y-4">
+        {/* 右侧：排行榜（Top 10）桌面端显示 */}
+        <div className="hidden lg:block lg:col-span-3 space-y-4">
           <Leaderboard
             items={viewItems}
             onOpenUser={(u) =>
@@ -191,6 +194,30 @@ export default function HomePage() {
           />
         </div>
       </main>
+
+      {/* 小屏：折叠排行榜移动到底部 */}
+      <div className="lg:hidden max-w-[1200px] mx-auto px-4 mt-6">
+        <button
+          onClick={() => setShowLeaderboard((v) => !v)}
+          className="w-full flex items-center justify-between px-4 py-2 rounded-lg border text-sm"
+          style={{ borderColor: THEME.border, background: THEME.surface }}
+        >
+          <span>排行榜</span>
+          <span>{showLeaderboard ? "收起" : "展开"}</span>
+        </button>
+        {showLeaderboard && (
+          <div className="mt-4 space-y-4">
+            <Leaderboard
+              items={viewItems}
+              onOpenUser={(u) =>
+                nav(`/u/${encodeURIComponent(u.nick)}`, {
+                  state: { avatar: u.avatar },
+                })
+              }
+            />
+          </div>
+        )}
+      </div>
 
       <div className="text-center text-xs text-gray-500 py-8">
         <span style={{ color: THEME.orchid }}>

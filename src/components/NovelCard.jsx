@@ -151,22 +151,22 @@ export default function NovelCard({
           )}
         </div>
 
-        <div className="p-4 h-full flex flex-col relative">
+        <div className="p-4 sm:p-5 h-full flex flex-col relative">
           <div className="flex-1">
-            <div className="flex items-center gap-2 pr-28">
+            <div className="flex items-center gap-2 pr-16 sm:pr-28">
               <OriChip value={item?.orientation || "其他"} />
               <Chip bg="#FFF" text="#6B7280">
                 {item?.category || "其他"}
               </Chip>
             </div>
-            <div className="mt-1 text-xs text-gray-500">
+            <div className="mt-1 text-xs sm:text-sm text-gray-500">
               推荐时间：{createdAt}
             </div>
 
             <div className="mt-1 flex items-center gap-2">
               <button
                 onClick={() => onOpenDetail && onOpenDetail(item)}
-                className="text-[16px] font-semibold hover:underline"
+                className="text-base sm:text-lg font-semibold hover:underline"
                 title="查看详情"
                 style={{ color: "#374151" }}
               >
@@ -175,7 +175,7 @@ export default function NovelCard({
               <span className="text-sm text-gray-500">作者：{author}</span>
               <button
                 onClick={openSummary}
-                className="ml-auto inline-flex items-center gap-1 text-xs px-2 py-1 rounded-full border"
+                className="ml-auto inline-flex items-center gap-1 text-xs sm:text-sm px-2 py-1 rounded-full border"
                 style={{
                   borderColor: THEME.border,
                   background: THEME.surface,
@@ -200,18 +200,18 @@ export default function NovelCard({
             </div>
 
             <div
-              className="mt-3 text-[15px] leading-relaxed text-gray-700 overflow-hidden"
+              className="mt-3 text-sm sm:text-base leading-relaxed text-gray-700 overflow-hidden"
               style={{ minHeight: 48 }}
             >
               {item?.blurb || "——"}
             </div>
           </div>
 
-          <div className="mt-4 flex items-center gap-3">
+          <div className="mt-4 flex items-center gap-2 sm:gap-3">
             <motion.button
               whileTap={{ scale: 0.9 }}
               onClick={onLike}
-              className="inline-flex items-center gap-1 px-3 py-1.5 rounded-full border"
+              className="inline-flex items-center gap-1 px-3 py-1.5 rounded-full border text-sm"
               style={{
                 borderColor: THEME.border,
                 background: liked ? "#FFF1F3" : THEME.surface,
@@ -228,7 +228,7 @@ export default function NovelCard({
             <motion.button
               whileTap={{ scale: 0.95 }}
               onClick={onToggleSave}
-              className="inline-flex items-center gap-1 px-3 py-1.5 rounded-full border"
+              className="inline-flex items-center gap-1 px-3 py-1.5 rounded-full border text-sm"
               style={{
                 borderColor: THEME.border,
                 background: saved ? "#F5F3FF" : THEME.surface,
@@ -244,7 +244,7 @@ export default function NovelCard({
 
             <button
               onClick={onOpenComments}
-              className="inline-flex items-center gap-1 px-3 py-1.5 rounded-full border"
+              className="inline-flex items-center gap-1 px-3 py-1.5 rounded-full border text-sm"
               style={{ borderColor: THEME.border, background: THEME.surface }}
               title="评论"
             >
