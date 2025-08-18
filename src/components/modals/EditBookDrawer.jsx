@@ -337,6 +337,7 @@ export default function EditBookDrawer({ open, bookId, onClose }) {
                     onChange={(e) => setOrientation(e.target.value)}
                     options={ORIENTATIONS}
                     disabled={submitting || expired}
+                    placeholder="请选择性向"
                   />
                 </div>
                 <div>
@@ -346,6 +347,7 @@ export default function EditBookDrawer({ open, bookId, onClose }) {
                     onChange={(e) => setCategory(e.target.value)}
                     options={CATEGORIES}
                     disabled={submitting || expired}
+                    placeholder="请选择类别"
                   />
                 </div>
               </div>

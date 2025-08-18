@@ -79,8 +79,7 @@ export default function FilterBar(props) {
             <button
               type="button"
               onClick={handleReset}
-              className="px-3 py-1.5 rounded-full border text-sm hidden sm:block"
-              style={{ borderColor: THEME.border, background: THEME.surface }}
+              className="text-sm text-gray-500 hover:text-rose-500 hidden sm:block"
               title="清空筛选条件"
             >
               重置
