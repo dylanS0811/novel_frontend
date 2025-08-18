@@ -355,13 +355,13 @@ export default function EditBookDrawer({ open, bookId, onClose }) {
               <div className="mt-3 grid grid-cols-1 md:grid-cols-2 gap-3">
                 <div>
                   <label className="text-sm text-gray-600">推荐语</label>
-                  <input
+                  <textarea
                     value={blurb}
                     onChange={(e) => {
                       setBlurb(e.target.value);
                       setErrors((er) => ({ ...er, blurb: null }));
                     }}
-                    className="w-full border rounded-xl px-3 py-2 bg-white/70"
+                    className="w-full border rounded-xl px-3 py-2 h-20 bg-white/70 resize-y"
                     placeholder="一句话强推理由（建议≤60字）"
                     style={{ borderColor: errors.blurb ? "#f43f5e" : THEME.border }}
                     disabled={submitting || expired}

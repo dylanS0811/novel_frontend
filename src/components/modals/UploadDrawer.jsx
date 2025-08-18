@@ -323,10 +323,10 @@ export default function UploadDrawer({ open, onClose, onSubmit }) {
               <div className="mt-3 grid grid-cols-1 md:grid-cols-2 gap-3">
                 <div>
                   <label className="text-sm text-gray-600">推荐语</label>
-                <input
+                  <textarea
                     value={blurb}
                     onChange={(e) => setBlurb(e.target.value)}
-                    className="w-full border rounded-xl px-3 py-2 bg白/70"
+                    className="w-full border rounded-xl px-3 py-2 h-20 bg白/70 resize-y"
                     placeholder="一句话强推理由（建议≤60字）"
                     style={{ borderColor: THEME.border }}
                   />
