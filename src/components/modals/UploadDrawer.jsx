@@ -1,6 +1,7 @@
 // src/components/modals/UploadDrawer.jsx
 import React, { useEffect, useMemo, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { createPortal } from "react-dom";
 import { Upload, PlusCircle, X } from "lucide-react";
 import { ORIENTATIONS, CATEGORIES, TAGS } from "../../lib/constants";
 import { THEME } from "../../lib/theme";
@@ -118,6 +119,15 @@ export default function UploadDrawer({ open, onClose, onSubmit }) {
     return () => clearTimeout(handle);
   }, [tagInput]);
 
+  useEffect(() => {
+    if (!open) return;
+    const originalOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = originalOverflow;
+    };
+  }, [open]);
+
   const suggestions = useMemo(() => {
     const q = tagInput.trim().toLowerCase();
     if (!q) return [];
@@ -234,11 +244,11 @@ export default function UploadDrawer({ open, onClose, onSubmit }) {
     }
   };
 
-  return (
+  const body = (
     <AnimatePresence>
       {open && (
         <motion.div
-          className="fixed inset-0 z-50"
+          className="fixed inset-0 z-[1000]"
           style={{ background: "rgba(20,16,21,0.35)" }}
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
@@ -470,4 +480,6 @@ export default function UploadDrawer({ open, onClose, onSubmit }) {
       )}
     </AnimatePresence>
   );
+
+  return createPortal(body, document.body);
 }
