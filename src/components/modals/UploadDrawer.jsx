@@ -306,6 +306,7 @@ export default function UploadDrawer({ open, onClose, onSubmit }) {
                     value={orientation}
                     onChange={(e) => setOrientation(e.target.value)}
                     options={ORIENTATIONS}
+                    placeholder="请选择性向"
                   />
                 </div>
                 <div>
@@ -314,6 +315,7 @@ export default function UploadDrawer({ open, onClose, onSubmit }) {
                     value={category}
                     onChange={(e) => setCategory(e.target.value)}
                     options={CATEGORIES}
+                    placeholder="请选择类别"
                   />
                 </div>
               </div>

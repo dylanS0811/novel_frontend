@@ -190,6 +190,7 @@ export default function BottomSheetForm({
                         value={form.orientation}
                         onChange={handleChange("orientation")}
                         options={ORIENTATIONS}
+                        placeholder="请选择性向"
                       />
                     </div>
                     <div>
@@ -198,6 +199,7 @@ export default function BottomSheetForm({
                         value={form.category}
                         onChange={handleChange("category")}
                         options={CATEGORIES}
+                        placeholder="请选择类别"
                       />
                     </div>
                   </div>
