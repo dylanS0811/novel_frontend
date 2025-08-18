@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { createPortal } from "react-dom";
 import { Upload, PlusCircle, X } from "lucide-react";
 import { ORIENTATIONS, CATEGORIES, TAGS } from "../../lib/constants";
+import CuteSelect from "../ui/CuteSelect";
 import { THEME } from "../../lib/theme";
 import { tagApi, bookApi } from "../../api/sdk";
 import { useAppStore } from "../../store/AppStore";
@@ -301,33 +302,19 @@ export default function UploadDrawer({ open, onClose, onSubmit }) {
                 </div>
                 <div>
                   <label className="text-sm text-gray-600">性向</label>
-                  <select
+                  <CuteSelect
                     value={orientation}
                     onChange={(e) => setOrientation(e.target.value)}
-                    className="w-full border rounded-xl px-3 py-2 bg-white"
-                    style={{ borderColor: THEME.border }}
-                  >
-                    {ORIENTATIONS.map((o) => (
-                      <option key={o} value={o}>
-                        {o}
-                      </option>
-                    ))}
-                  </select>
+                    options={ORIENTATIONS}
+                  />
                 </div>
                 <div>
                   <label className="text-sm text-gray-600">类别</label>
-                  <select
+                  <CuteSelect
                     value={category}
                     onChange={(e) => setCategory(e.target.value)}
-                    className="w-full border rounded-xl px-3 py-2 bg白"
-                    style={{ borderColor: THEME.border }}
-                  >
-                    {CATEGORIES.map((c) => (
-                      <option key={c} value={c}>
-                        {c}
-                      </option>
-                    ))}
-                  </select>
+                    options={CATEGORIES}
+                  />
                 </div>
               </div>
 
