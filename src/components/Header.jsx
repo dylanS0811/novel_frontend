@@ -1,7 +1,18 @@
 // src/components/Header.jsx
 // 顶部导航：品牌、搜索、上传、个人中心/登录、通知中心
 import React, { useEffect, useRef, useState } from "react";
-import { Search, Upload, Bell, Flame, Sparkles, LogOut, User2 } from "lucide-react";
+import {
+  Search,
+  Upload,
+  Bell,
+  Flame,
+  Sparkles,
+  LogOut,
+  User2,
+  Menu,
+  X,
+} from "lucide-react";
+import MobileMenuDrawer from "./modals/MobileMenuDrawer";
 import BookHamsterIcon from "./icons/BookHamsterIcon";
 import ConfirmModal from "./modals/ConfirmModal";
 import { THEME } from "../lib/theme";
@@ -57,6 +68,8 @@ export default function Header(props) {
   const [menuOpen, setMenuOpen] = useState(false);
   const [confirmOpen, setConfirmOpen] = useState(false);
   const menuRef = useRef(null);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
 
   // 点击外部关闭用户下拉
   useEffect(() => {
@@ -135,6 +148,26 @@ export default function Header(props) {
             </button>
           </div>
 
+          {/* mobile search button */}
+          <button
+            onClick={() => setMobileSearchOpen(true)}
+            className="md:hidden p-2 rounded-md hover:bg-rose-50"
+            type="button"
+            title="搜索"
+          >
+            <Search className="w-6 h-6" />
+          </button>
+
+          {/* mobile menu button */}
+          <button
+            onClick={() => setMobileMenuOpen(true)}
+            className="md:hidden p-2 rounded-md hover:bg-rose-50"
+            type="button"
+            title="菜单"
+          >
+            <Menu className="w-6 h-6" />
+          </button>
+
           {/* 闪电上传 */}
           <button
             onClick={() => (store.user ? onOpenUpload() : store.setAuthOpen(true))}
@@ -152,7 +185,7 @@ export default function Header(props) {
 
           {/* 登录 / 个人中心（带下拉） */}
           {store.user ? (
-            <div className="relative ml-2" ref={menuRef}>
+            <div className="relative ml-2 hidden md:block" ref={menuRef}>
               <button
                 onClick={() => setMenuOpen((v) => !v)}
                 className="inline-flex items-center gap-2 px-2 py-1.5 rounded-full border bg-white"
@@ -205,7 +238,7 @@ export default function Header(props) {
           ) : (
             <button
               onClick={() => store.setAuthOpen(true)}
-              className="ml-2 inline-flex items-center gap-2 px-3 py-2 rounded-full text-white"
+              className="ml-2 hidden md:inline-flex items-center gap-2 px-3 py-2 rounded-full text-white"
               style={{ background: "linear-gradient(135deg,#C084FC,#A78BFA)" }}
               type="button"
               title="登录/注册"
@@ -216,7 +249,7 @@ export default function Header(props) {
 
           {/* 通知中心 */}
           <button
-            className="relative ml-1"
+            className="relative ml-1 hidden md:block"
             title="通知中心"
             type="button"
             onClick={() => (store.user ? store.setNotifyOpen(true) : store.setAuthOpen(true))}
@@ -229,6 +262,39 @@ export default function Header(props) {
             )}
           </button>
         </div>
+
+        {mobileSearchOpen && (
+          <div
+            className="mt-2 md:hidden flex items-center gap-2 rounded-full px-3 py-2 shadow-sm border"
+            style={{ background: THEME.surface, borderColor: THEME.border }}
+          >
+            <Search className="w-4 h-4 text-gray-500" />
+            <input
+              value={q}
+              onChange={(e) => setQ(e.target.value)}
+              onKeyDown={(e) => e.key === "Enter" && triggerSearch()}
+              placeholder="搜索 书名/作者/标签"
+              className="flex-1 outline-none bg-transparent"
+            />
+            <button
+              type="button"
+              onClick={triggerSearch}
+              className="px-3 py-1 rounded-full text-white"
+              style={{ background: "linear-gradient(135deg, #F472B6 0%, #FB7185 100%)" }}
+              title="搜索"
+            >
+              搜索
+            </button>
+            <button
+              onClick={() => setMobileSearchOpen(false)}
+              className="p-1 ml-1 rounded-md hover:bg-rose-50"
+              type="button"
+              title="关闭"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          </div>
+        )}
 
         {/* 首页才显示：热榜 / 新粮 */}
         {isHome && (
@@ -252,6 +318,11 @@ export default function Header(props) {
       </div>
 
       {/* 退出确认弹窗（用 Portal 渲染到 body） */}
+      <MobileMenuDrawer
+        open={mobileMenuOpen}
+        onClose={() => setMobileMenuOpen(false)}
+        onOpenUpload={onOpenUpload}
+      />
       <ConfirmModal
         open={confirmOpen}
         title="退出登录"
