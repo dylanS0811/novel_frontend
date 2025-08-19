@@ -78,10 +78,31 @@ const NOTIFICATION_TYPE_MAP = {
 };
 
 function normalizeNotification(n = {}) {
+  const {
+    actorId,
+    actorNick,
+    actorNickname,
+    actorName,
+    actorAvatar,
+    ...rest
+  } = n;
+
+  const actor =
+    actorId || actorNick || actorNickname || actorName || actorAvatar
+      ? {
+          id: actorId,
+          nick: actorNick,
+          nickname: actorNickname,
+          name: actorName,
+          avatar: actorAvatar,
+        }
+      : undefined;
+
   return {
-    ...n,
+    ...rest,
     type: NOTIFICATION_TYPE_MAP[n.type] || n.type?.toLowerCase(),
     bookTitle: n.bookTitle || n.title,
+    actor,
   };
 }
 
@@ -341,14 +362,17 @@ export function AppProvider({ children }) {
   const [notifyOpen, setNotifyOpen] = useState(false);
 
   const addNotification = (n) =>
-    setNotifications((arr) => [
-      {
-        id: n.id ?? "n" + Math.random().toString(36).slice(2),
-        read: n.read ?? false,
-        ...n,
-      },
-      ...arr,
-    ]);
+    setNotifications((arr) => {
+      const mapped = normalizeNotification(n);
+      return [
+        {
+          id: mapped.id ?? "n" + Math.random().toString(36).slice(2),
+          read: mapped.read ?? false,
+          ...mapped,
+        },
+        ...arr,
+      ];
+    });
 
   const markNotificationRead = async (id) => {
     try {
