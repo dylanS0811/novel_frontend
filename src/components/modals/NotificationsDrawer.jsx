@@ -183,7 +183,11 @@ export default function NotificationsDrawer({ open, onClose }) {
   };
 
   const renderText = (n) => {
-    const who = n.actor?.nick || n.actor?.name || "有人";
+    const who =
+      n.actor?.nick ||
+      n.actor?.nickname ||
+      n.actor?.name ||
+      "有人";
     const book = n.bookTitle || "作品";
     const excerpt = n.content || "";
     switch (n.type) {
@@ -400,7 +404,12 @@ export default function NotificationsDrawer({ open, onClose }) {
                       <div className="relative">
                         <img
                           src={n.actor.avatar}
-                          alt={n.actor?.nick || n.actor?.name || "avatar"}
+                          alt={
+                            n.actor?.nick ||
+                            n.actor?.nickname ||
+                            n.actor?.name ||
+                            "avatar"
+                          }
                           className={classNames(
                             "w-9 h-9 rounded-full object-cover border",
                             n.read ? "border-gray-200" : "border-rose-200"

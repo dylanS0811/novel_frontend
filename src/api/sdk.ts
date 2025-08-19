@@ -254,7 +254,13 @@ export interface NotificationItem {
   read: boolean;
   createdAt: string | number;
   /** 触发者 */
-  actor?: { id: number; nick: string; avatar?: string };
+  actor?: {
+    id: number;
+    nick?: string;
+    nickname?: string;
+    name?: string;
+    avatar?: string;
+  };
   /** 关联书籍/评论 ID */
   bookId?: number;
   bookTitle?: string;
