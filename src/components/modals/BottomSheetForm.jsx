@@ -33,7 +33,7 @@ export default function BottomSheetForm({
         if (saved) data = JSON.parse(saved);
       } catch {}
     }
-    const { cover, coverUrl, ...rest } = data;
+    const { cover, coverUrl, tags: restTags, ...rest } = data;
     setForm({
       name: "",
       intro: "",
@@ -45,7 +45,9 @@ export default function BottomSheetForm({
       rating: "",
       review: "",
       summary: "",
-      tags: "",
+      tags: Array.isArray(restTags)
+        ? restTags.join(",")
+        : restTags || "",
       ...rest,
     });
     setErrors({});
@@ -79,7 +81,14 @@ export default function BottomSheetForm({
 
   const handleSubmit = () => {
     if (!validate()) return;
-    const { cover, coverUrl, ...payload } = form;
+    const { cover, coverUrl, tags, ...payload } = form;
+    if (typeof tags === "string") {
+      const arr = tags
+        .split(",")
+        .map((t) => t.trim())
+        .filter(Boolean);
+      if (arr.length) payload.tags = arr;
+    }
     onSubmit(payload);
     try {
       localStorage.removeItem(storageKey);
