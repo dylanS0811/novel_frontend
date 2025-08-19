@@ -9,7 +9,7 @@ import { classNames } from "../lib/utils";
 import NovelCard from "../components/NovelCard";
 import BookSheetPanel from "../components/BookSheetPanel";
 import { useAppStore } from "../store/AppStore";
-import { meApi, uploadApi } from "../api/sdk";
+import { meApi, uploadApi, bookApi } from "../api/sdk";
 
 /** 顶部轻提示（2 秒后自动消失）- 玻璃拟物 + 渐变描边 */
 function Toast({ message, onClose }) {
@@ -92,15 +92,88 @@ function Toast({ message, onClose }) {
 
 /** 内联组件：我的书架分区（供本页与 BookshelfPage 复用） */
 export function BookshelfSection() {
-  const { items, savedIds, nick, toggleSave, setCommentsOpen, setEditingBook } = useAppStore();
+  const {
+    savedIds,
+    nick,
+    toggleSave,
+    setCommentsOpen,
+    setEditingBook,
+    user,
+  } = useAppStore();
   const [tab, setTab] = useState("fav"); // fav | rec | sheet
 
-  const favorites = items.filter((i) => savedIds.has(i.id));
-  const myRecs = items.filter((i) => {
-    const r = i?.recommender;
-    const recNick = r?.name || r?.nick || r?.nickname;
-    return recNick === nick;
-  });
+  const [favorites, setFavorites] = useState([]);
+  const [myRecs, setMyRecs] = useState([]);
+
+  // 拉取收藏的书（兼容返回 id 列表或书籍列表）
+  useEffect(() => {
+    if (!user?.id) {
+      setFavorites([]);
+      return;
+    }
+    let aborted = false;
+    (async () => {
+      try {
+        const res = await bookApi.userBookmarks(user.id);
+        const data = res?.data ?? res ?? {};
+        let list = [];
+        const raw = Array.isArray(data)
+          ? data
+          : Array.isArray(data.list)
+          ? data.list
+          : Array.isArray(data.items)
+          ? data.items
+          : Array.isArray(data.ids)
+          ? data.ids
+          : [];
+        if (raw.length > 0 && typeof raw[0] === "object") {
+          list = raw;
+        } else if (Array.isArray(raw)) {
+          const details = await Promise.all(
+            raw.map((id) =>
+              bookApi
+                .detail(id)
+                .then((r) => r?.data || r)
+                .catch(() => null)
+            )
+          );
+          list = details.filter(Boolean);
+        }
+        if (!aborted) setFavorites(list);
+      } catch (e) {
+        console.error("load favorite books failed", e);
+      }
+    })();
+    return () => {
+      aborted = true;
+    };
+  }, [user?.id, savedIds]);
+
+  // 拉取我推荐的书
+  useEffect(() => {
+    if (!nick && !user?.id) {
+      setMyRecs([]);
+      return;
+    }
+    let aborted = false;
+    (async () => {
+      try {
+        const res = await bookApi.list({
+          page: 1,
+          size: 100,
+          ...(user?.id ? { recommenderId: user.id } : { recommender: nick }),
+        });
+        const data = res?.data || res || {};
+        const list = data.list ?? data.items ?? [];
+        if (!aborted) setMyRecs(list);
+      } catch (e) {
+        console.error("load my rec books failed", e);
+      }
+    })();
+    return () => {
+      aborted = true;
+    };
+  }, [nick, user?.id]);
 
   const list = tab === "fav" ? favorites : myRecs;
 
