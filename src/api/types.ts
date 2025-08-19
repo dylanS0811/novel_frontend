@@ -52,7 +52,13 @@ export interface Notification {
   content?: string;
   read: boolean;
   createdAt: string;
-  actor?: { id: number; nick?: string; name?: string; avatar?: string };
+  actor?: {
+    id: number;
+    nick?: string;
+    nickname?: string;
+    name?: string;
+    avatar?: string;
+  };
   bookId?: number;
   bookTitle?: string;
   commentId?: number;
