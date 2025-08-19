@@ -190,6 +190,8 @@ export interface SheetBook {
   category?: string;
   rating?: number;
   review?: string;
+  summary?: string;
+  tags?: string[];
   createdAt?: string | number;
 }
 

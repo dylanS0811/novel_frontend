@@ -116,7 +116,7 @@ export default function SheetBookDetailModal({ open, book, onClose }) {
                   </div>
 
                   <div className="flex items-center gap-2 ml-auto">
-                    {book?.orientation && (
+                  {book?.orientation && (
                       <span className="px-2.5 py-1 rounded-full bg-pink-50 text-pink-600 text-xs border border-pink-100">
                         <Tag className="inline -mt-[3px] mr-1 h-4 w-4" />
                         {book.orientation}
@@ -131,11 +131,32 @@ export default function SheetBookDetailModal({ open, book, onClose }) {
                   </div>
                 </div>
 
+                {Array.isArray(book?.tags) && book.tags.length > 0 && (
+                  <div className="mt-3 flex flex-wrap items-center gap-2">
+                    {book.tags.map((tag, idx) => (
+                      <span
+                        key={idx}
+                        className="px-2.5 py-1 rounded-full bg-gray-50 text-gray-600 text-xs border border-gray-100"
+                      >
+                        {tag}
+                      </span>
+                    ))}
+                  </div>
+                )}
+
                 {/* 一句话推荐 */}
                 {book?.review && (
                   <div className="mt-5 rounded-2xl border border-[#F7E3EA] bg-[#FFF6F8] p-5 relative">
                     <Quote className="h-5 w-5 text-pink-400 absolute -top-3 -left-3 rotate-12" />
                     <div className="text-sm text-gray-700 leading-6">{book.review}</div>
+                  </div>
+                )}
+
+                {book?.summary && (
+                  <div className="mt-5 rounded-2xl border border-[#F7E3EA] bg-[#FFF6F8] p-5">
+                    <div className="text-sm text-gray-700 leading-6 whitespace-pre-wrap">
+                      {book.summary}
+                    </div>
                   </div>
                 )}
 
