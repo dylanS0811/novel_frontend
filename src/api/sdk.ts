@@ -82,6 +82,8 @@ export type BooksQuery = {
   orientation?: string;
   search?: string;
   tag?: string;
+  includeTags?: string[];
+  excludeTags?: string[];
   recommender?: string;
   recommenderId?: number;
   page?: number;
@@ -89,13 +91,17 @@ export type BooksQuery = {
 };
 
 export const bookApi = {
-  list: (params: BooksQuery) =>
-    http.get<{
+  list: (params: BooksQuery) => {
+    const p: Record<string, any> = { ...params };
+    if (Array.isArray(p.includeTags)) p.includeTags = p.includeTags.join(',');
+    if (Array.isArray(p.excludeTags)) p.excludeTags = p.excludeTags.join(',');
+    return http.get<{
       list: BookSummary[];
       page: number;
       size: number;
       total: number;
-    }>('/api/books', { params }),
+    }>('/api/books', { params: p });
+  },
 
   detail: (id: number) => http.get<BookSummary>(`/api/books/${id}`),
 
@@ -225,6 +231,13 @@ export const sheetApi = {
 
 // --------------- Tags --------------------
 export const tagApi = {
+  list: (params: { search?: string; page?: number; size?: number; sort?: string }) =>
+    http.get<{
+      list: { id: number; name: string; hot?: number }[];
+      page: number;
+      size: number;
+      total: number;
+    }>('/api/tags', { params }),
   suggest: (q: string) =>
     http.get<string[]>('/api/tags/suggest', { params: { q } }),
   create: (payload: { name: string }) =>
