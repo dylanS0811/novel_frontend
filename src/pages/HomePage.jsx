@@ -35,6 +35,8 @@ export default function HomePage() {
     // 筛选（仍由全局 Store 管）
     tab, category, orientation, setCategory, setOrientation,
     search,
+    includeTags,
+    excludeTags,
 
     // 分页
     page,
@@ -49,6 +51,8 @@ export default function HomePage() {
     tab,
     category: category === "全部" ? undefined : category,
     orientation: orientation === "全部" ? undefined : orientation,
+    includeTags: includeTags.length ? includeTags : undefined,
+    excludeTags: excludeTags.length ? excludeTags : undefined,
     search: !isTagSearch && search ? search : undefined,
     tag: isTagSearch ? search.slice(1) : undefined,
     page,
@@ -152,6 +156,12 @@ export default function HomePage() {
             <b>{tab === "hot" ? "热榜（点赞降序）" : "新粮（时间倒序）"}</b>
             {category && category !== "全部" && <> · 类别：<b>{category}</b></>}
             {orientation && orientation !== "全部" && <> · 性向：<b>{orientation}</b></>}
+            {includeTags.length > 0 && (
+              <> · 包含：<b>{includeTags.join(',')}</b></>
+            )}
+            {excludeTags.length > 0 && (
+              <> · 排除：<b>{excludeTags.join(',')}</b></>
+            )}
             {search && <> · 搜索：<b>{search}</b></>}
             <span className="ml-2">共 {total} 条</span>
           </div>
@@ -160,8 +170,9 @@ export default function HomePage() {
             <div className="text-sm text-gray-500 py-8">加载中...</div>
           ) : viewItems.length === 0 ? (
             <div className="text-sm text-gray-500 py-8">
-              暂无数据。你可以点击左上角“LOGO”回首页清空筛选，
-              或检查来源数据是否缺少必填字段（title/category/orientation）。
+              {includeTags.length || excludeTags.length
+                ? "未找到匹配书籍，试试调整标签或清空筛选"
+                : "暂无数据。你可以点击左上角“LOGO”回首页清空筛选，或检查来源数据是否缺少必填字段（title/category/orientation）。"}
             </div>
           ) : (
             <>

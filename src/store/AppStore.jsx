@@ -9,7 +9,14 @@ const likeInflight = new Set();
 const bookmarkInflight = new Set();
 
 // 首页筛选默认值
-const DEFAULTS = { tab: "new", category: "全部", orientation: "全部", search: "" };
+const DEFAULTS = {
+  tab: "new",
+  category: "全部",
+  orientation: "全部",
+  search: "",
+  includeTags: [],
+  excludeTags: [],
+};
 
 // 工具：从 /api/likes /api/bookmarks 响应中稳健提取 ids 数组（兼容 {data:{ids}}, {ids}, 纯数组）
 function extractIds(resp) {
@@ -131,13 +138,42 @@ export function AppProvider({ children }) {
   const [category, setCategory] = useState(DEFAULTS.category);
   const [orientation, setOrientation] = useState(DEFAULTS.orientation);
   const [search, setSearch] = useState(DEFAULTS.search);
+  const [includeTags, setIncludeTags] = useState(DEFAULTS.includeTags);
+  const [excludeTags, setExcludeTags] = useState(DEFAULTS.excludeTags);
   const resetFilters = () => {
     setTab(DEFAULTS.tab);
     setCategory(DEFAULTS.category);
     setOrientation(DEFAULTS.orientation);
     setSearch(DEFAULTS.search);
+    setIncludeTags([]);
+    setExcludeTags([]);
     setPage(1);
   };
+
+  // URL -> 状态初始化
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const cat = params.get('cat');
+    const ori = params.get('ori');
+    const include = params.get('include');
+    const exclude = params.get('exclude');
+    if (cat) setCategory(cat);
+    if (ori) setOrientation(ori);
+    if (include) setIncludeTags(include.split(',').filter(Boolean));
+    if (exclude) setExcludeTags(exclude.split(',').filter(Boolean));
+  }, []);
+
+  // 状态 -> URL 同步
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (category && category !== '全部') params.set('cat', category); else params.delete('cat');
+    if (orientation && orientation !== '全部') params.set('ori', orientation); else params.delete('ori');
+    if (includeTags.length) params.set('include', includeTags.join(',')); else params.delete('include');
+    if (excludeTags.length) params.set('exclude', excludeTags.join(',')); else params.delete('exclude');
+    const searchStr = params.toString();
+    const newUrl = searchStr ? `?${searchStr}` : location.pathname;
+    window.history.replaceState(null, '', newUrl);
+  }, [category, orientation, includeTags, excludeTags]);
 
   const [user, setUser] = useState(null);
   const [authOpen, setAuthOpen] = useState(false);
@@ -603,6 +639,8 @@ export function AppProvider({ children }) {
         tab,
         category: category === "全部" ? undefined : category,
         orientation: orientation === "全部" ? undefined : orientation,
+        includeTags: includeTags.length ? includeTags : undefined,
+        excludeTags: excludeTags.length ? excludeTags : undefined,
         search: !isTagSearch && search ? search : undefined,
         tag: isTagSearch ? search.slice(1) : undefined,
         page,
@@ -685,6 +723,8 @@ export function AppProvider({ children }) {
           tab,
           category: category === "全部" ? undefined : category,
           orientation: orientation === "全部" ? undefined : orientation,
+          includeTags: includeTags.length ? includeTags : undefined,
+          excludeTags: excludeTags.length ? excludeTags : undefined,
           search: !isTagSearch && search ? search : undefined,
           tag: isTagSearch ? search.slice(1) : undefined,
           page,
@@ -709,7 +749,7 @@ export function AppProvider({ children }) {
     return () => {
       aborted = true;
     };
-  }, [tab, category, orientation, search, page, size]);
+  }, [tab, category, orientation, includeTags, excludeTags, search, page, size]);
 
   // 打开评论抽屉时拉评论
   useEffect(() => {
@@ -858,6 +898,10 @@ export function AppProvider({ children }) {
       setOrientation,
       search,
       setSearch,
+      includeTags,
+      setIncludeTags,
+      excludeTags,
+      setExcludeTags,
       resetFilters,
 
       // 登录
@@ -915,6 +959,8 @@ export function AppProvider({ children }) {
       tab,
       category,
       orientation,
+      includeTags,
+      excludeTags,
       search,
       user,
       authOpen,
