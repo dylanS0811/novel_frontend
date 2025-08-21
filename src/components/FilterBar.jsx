@@ -88,6 +88,18 @@ export default function FilterBar(props) {
     setExcludeTags([]);
   };
 
+  const ResetButton = () => (
+    <button
+      type="button"
+      onClick={handleReset}
+      className="inline-flex items-center gap-1 px-3 py-1.5 rounded-full border border-rose-200 bg-rose-50 text-sm text-rose-500 hover:bg-rose-100 hover:text-rose-600 transition"
+      title="清空筛选条件"
+    >
+      <RotateCcw className="w-4 h-4" />
+      <span>重置</span>
+    </button>
+  );
+
   useEffect(() => {
     // 标签面板展开时一次性加载全部标签
     if (!tagPanelOpen || tagList.length > 0) return;
@@ -138,16 +150,8 @@ export default function FilterBar(props) {
           </div>
 
           {/* 右侧“重置” */}
-          <div className="ml-auto mt-2 sm:mt-0">
-            <button
-              type="button"
-              onClick={handleReset}
-              className="inline-flex items-center gap-1 px-3 py-1.5 rounded-full border border-rose-200 bg-rose-50 text-sm text-rose-500 hover:bg-rose-100 hover:text-rose-600 transition"
-              title="清空筛选条件"
-            >
-              <RotateCcw className="w-4 h-4" />
-              <span>重置</span>
-            </button>
+          <div className="ml-auto mt-2 sm:mt-0 hidden sm:block">
+            <ResetButton />
           </div>
         </div>
 
@@ -165,6 +169,11 @@ export default function FilterBar(props) {
               />
             ))}
           </div>
+        </div>
+
+        {/* 移动端“重置” */}
+        <div className="mt-2 text-right sm:hidden">
+          <ResetButton />
         </div>
 
         {/* 标签 */}
