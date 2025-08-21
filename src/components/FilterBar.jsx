@@ -40,8 +40,6 @@ function Pill({ active, onClick, label, kind = "cat" }) {
  */
 export default function FilterBar(props) {
   const store = useAppStore();
-
-  const [menuOpen, setMenuOpen] = useState(false);
   const [tagPanelOpen, setTagPanelOpen] = useState(false);
   const [tagQuery, setTagQuery] = useState("");
   const [tagList, setTagList] = useState([]); // 全部标签列表
@@ -125,7 +123,7 @@ export default function FilterBar(props) {
     >
       <div className="max-w-[1200px] mx-auto px-4 py-3">
         {/* 类别 */}
-        <div className="flex items-center gap-3">
+        <div className="flex flex-wrap sm:flex-nowrap items-center gap-2 sm:gap-3">
           <div className="text-sm text-gray-600 shrink-0">类别：</div>
           <div className="flex items-center gap-2 overflow-x-auto flex-nowrap sm:flex-wrap sm:overflow-visible">
             {["全部", ...CATEGORIES].map((c) => (
@@ -140,42 +138,16 @@ export default function FilterBar(props) {
           </div>
 
           {/* 右侧“重置” */}
-          <div className="ml-auto relative">
+          <div className="ml-auto mt-2 sm:mt-0">
             <button
               type="button"
               onClick={handleReset}
-              className="hidden sm:inline-flex items-center gap-1 px-3 py-1.5 rounded-full border border-rose-200 bg-rose-50 text-sm text-rose-500 hover:bg-rose-100 hover:text-rose-600 transition"
+              className="inline-flex items-center gap-1 px-3 py-1.5 rounded-full border border-rose-200 bg-rose-50 text-sm text-rose-500 hover:bg-rose-100 hover:text-rose-600 transition"
               title="清空筛选条件"
             >
               <RotateCcw className="w-4 h-4" />
               <span>重置</span>
             </button>
-            <button
-              type="button"
-              onClick={() => setMenuOpen((v) => !v)}
-              className="px-3 py-1.5 rounded-full border text-sm sm:hidden"
-              style={{ borderColor: THEME.border, background: THEME.surface }}
-            >
-              筛选
-            </button>
-            {menuOpen && (
-              <div
-                className="absolute right-0 mt-2 w-24 rounded-md border bg-white shadow-md p-2"
-                style={{ borderColor: THEME.border }}
-              >
-                <button
-                  type="button"
-                  onClick={() => {
-                    handleReset();
-                    setMenuOpen(false);
-                  }}
-                  className="w-full px-3 py-1.5 flex items-center justify-center gap-1 text-sm text-rose-500 rounded-full hover:bg-rose-50"
-                >
-                  <RotateCcw className="w-4 h-4" />
-                  <span>重置</span>
-                </button>
-              </div>
-            )}
           </div>
         </div>
 
