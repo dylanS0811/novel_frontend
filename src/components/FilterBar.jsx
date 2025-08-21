@@ -1,6 +1,7 @@
 // 筛选条（类别 & 性向）— 选中态更醒目，类别与性向使用不同的高亮色
 import React, { useState, useEffect } from "react";
 import { RotateCcw, Plus, Minus, ChevronDown } from "lucide-react";
+import PinyinMatch from "pinyin-match";
 import { THEME } from "../lib/theme";
 import { useAppStore } from "../store/AppStore";
 import { CATEGORIES, ORIENTATIONS } from "../lib/constants";
@@ -43,7 +44,7 @@ export default function FilterBar(props) {
   const [menuOpen, setMenuOpen] = useState(false);
   const [tagPanelOpen, setTagPanelOpen] = useState(false);
   const [tagQuery, setTagQuery] = useState("");
-  const [tagList, setTagList] = useState([]);
+  const [tagList, setTagList] = useState([]); // 全部标签列表
   const [loadingTags, setLoadingTags] = useState(false);
   const [tagError, setTagError] = useState(null);
 
@@ -90,18 +91,14 @@ export default function FilterBar(props) {
   };
 
   useEffect(() => {
-    if (!tagPanelOpen) return;
+    // 标签面板展开时一次性加载全部标签
+    if (!tagPanelOpen || tagList.length > 0) return;
     const ctrl = { aborted: false };
-    const timer = setTimeout(async () => {
+    (async () => {
       setLoadingTags(true);
       setTagError(null);
       try {
-        const res = await tagApi.list({
-          search: tagQuery || undefined,
-          page: 1,
-          size: 50,
-          sort: 'hot',
-        });
+        const res = await tagApi.list({ page: 1, size: 9999, sort: 'hot' });
         const data = res?.data || res || {};
         if (!ctrl.aborted) setTagList(data.list || []);
       } catch (e) {
@@ -112,12 +109,11 @@ export default function FilterBar(props) {
       } finally {
         if (!ctrl.aborted) setLoadingTags(false);
       }
-    }, 300);
+    })();
     return () => {
       ctrl.aborted = true;
-      clearTimeout(timer);
     };
-  }, [tagPanelOpen, tagQuery]);
+  }, [tagPanelOpen, tagList.length]);
 
   return (
     <div
@@ -224,65 +220,72 @@ export default function FilterBar(props) {
                 className="w-full px-3 py-1.5 border rounded-md text-sm"
                 style={{ borderColor: THEME.border }}
               />
-              <div className="max-h-40 overflow-y-auto flex flex-wrap gap-2 text-sm">
-                {loadingTags ? (
-                  <div className="text-gray-500">加载中...</div>
-                ) : tagError ? (
-                  <div className="text-gray-500">
-                    标签加载失败，请重试
-                    <button
-                      type="button"
-                      className="ml-1 text-rose-500 underline"
-                      onClick={() => setTagQuery(tagQuery)}
-                    >
-                      重试
-                    </button>
+              {(() => {
+                const filtered = tagQuery
+                  ? tagList.filter((t) => PinyinMatch.match(t.name, tagQuery))
+                  : tagList;
+                return (
+                  <div className="h-40 overflow-auto flex flex-wrap gap-2 text-sm w-full">
+                    {loadingTags ? (
+                      <div className="text-gray-500">加载中...</div>
+                    ) : tagError ? (
+                      <div className="text-gray-500">
+                        标签加载失败，请重试
+                        <button
+                          type="button"
+                          className="ml-1 text-rose-500 underline"
+                          onClick={() => setTagQuery(tagQuery)}
+                        >
+                          重试
+                        </button>
+                      </div>
+                    ) : filtered.length === 0 ? (
+                      <div className="text-gray-500">无匹配标签</div>
+                    ) : (
+                      filtered.map((t) => (
+                        <div
+                          key={t.id || t.name}
+                          className={`px-2 py-1 rounded-full border flex items-center gap-1 ${includeTags.includes(t.name) || excludeTags.includes(t.name) ? "text-white shadow-sm" : ""}`}
+                          style={{
+                            background: includeTags.includes(t.name)
+                              ? "linear-gradient(135deg, #FDE68A 0%, #FBBF24 100%)"
+                              : excludeTags.includes(t.name)
+                              ? "linear-gradient(135deg, #FCA5A5 0%, #F87171 100%)"
+                              : THEME.surface,
+                            borderColor: THEME.border,
+                            boxShadow:
+                              includeTags.includes(t.name) || excludeTags.includes(t.name)
+                                ? THEME.shadow
+                                : "none",
+                          }}
+                        >
+                          <span className="whitespace-nowrap">{t.name}</span>
+                          <button
+                            type="button"
+                            className="w-4 h-4 flex items-center justify-center rounded-full border text-xs bg-white"
+                            style={{ borderColor: THEME.border }}
+                            onClick={() => handleInclude(t.name)}
+                            aria-label="包含标签"
+                            title="包含标签"
+                          >
+                            <Plus className="w-3 h-3" />
+                          </button>
+                          <button
+                            type="button"
+                            className="w-4 h-4 flex items-center justify-center rounded-full border text-xs bg-white"
+                            style={{ borderColor: THEME.border }}
+                            onClick={() => handleExclude(t.name)}
+                            aria-label="排除标签"
+                            title="排除标签"
+                          >
+                            <Minus className="w-3 h-3" />
+                          </button>
+                        </div>
+                      ))
+                    )}
                   </div>
-                ) : tagList.length === 0 ? (
-                  <div className="text-gray-500">无匹配标签</div>
-                ) : (
-                  tagList.map((t) => (
-                    <div
-                      key={t.id || t.name}
-                      className={`px-2 py-1 rounded-full border flex items-center gap-1 ${includeTags.includes(t.name) || excludeTags.includes(t.name) ? "text-white shadow-sm" : ""}`}
-                      style={{
-                        background: includeTags.includes(t.name)
-                          ? "linear-gradient(135deg, #FDE68A 0%, #FBBF24 100%)"
-                          : excludeTags.includes(t.name)
-                          ? "linear-gradient(135deg, #FCA5A5 0%, #F87171 100%)"
-                          : THEME.surface,
-                        borderColor: THEME.border,
-                        boxShadow:
-                          includeTags.includes(t.name) || excludeTags.includes(t.name)
-                            ? THEME.shadow
-                            : "none",
-                      }}
-                    >
-                      <span className="whitespace-nowrap">{t.name}</span>
-                      <button
-                        type="button"
-                        className="w-4 h-4 flex items-center justify-center rounded-full border text-xs bg-white"
-                        style={{ borderColor: THEME.border }}
-                        onClick={() => handleInclude(t.name)}
-                        aria-label="包含标签"
-                        title="包含标签"
-                      >
-                        <Plus className="w-3 h-3" />
-                      </button>
-                      <button
-                        type="button"
-                        className="w-4 h-4 flex items-center justify-center rounded-full border text-xs bg-white"
-                        style={{ borderColor: THEME.border }}
-                        onClick={() => handleExclude(t.name)}
-                        aria-label="排除标签"
-                        title="排除标签"
-                      >
-                        <Minus className="w-3 h-3" />
-                      </button>
-                    </div>
-                  ))
-                )}
-              </div>
+                );
+              })()}
               {(includeTags.length > 0 || excludeTags.length > 0) && (
                 <div className="pt-2 space-y-1 text-sm">
                   {includeTags.length > 0 && (
