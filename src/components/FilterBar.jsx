@@ -135,9 +135,9 @@ export default function FilterBar(props) {
     >
       <div className="max-w-[1200px] mx-auto px-4 py-3">
         {/* 类别 */}
-        <div className="flex flex-wrap sm:flex-nowrap items-center gap-2 sm:gap-3">
-          <div className="text-sm text-gray-600 shrink-0">类别：</div>
-          <div className="flex items-center gap-2 overflow-x-auto flex-nowrap sm:flex-wrap sm:overflow-visible">
+        <div className="grid grid-cols-[auto,1fr] items-start gap-2 sm:flex sm:flex-nowrap sm:items-center sm:gap-3">
+          <div className="shrink-0 whitespace-nowrap text-sm text-gray-600">类别：</div>
+          <div className="min-w-0 flex flex-wrap gap-2 sm:flex-wrap">
             {["全部", ...CATEGORIES].map((c) => (
               <Pill
                 key={c}
@@ -150,15 +150,15 @@ export default function FilterBar(props) {
           </div>
 
           {/* 右侧“重置” */}
-          <div className="ml-auto mt-2 sm:mt-0 hidden sm:block">
+          <div className="mt-2 hidden sm:block sm:ml-auto sm:mt-0">
             <ResetButton />
           </div>
         </div>
 
         {/* 性向 */}
-        <div className="mt-3 flex items-center gap-3">
-          <div className="text-sm text-gray-600 shrink-0">性向：</div>
-          <div className="flex items-center gap-2 overflow-x-auto flex-nowrap sm:flex-wrap sm:overflow-visible">
+        <div className="mt-3 grid grid-cols-[auto,1fr] items-start gap-2 sm:flex sm:items-center sm:gap-3">
+          <div className="shrink-0 whitespace-nowrap text-sm text-gray-600">性向：</div>
+          <div className="min-w-0 flex flex-wrap gap-2 sm:flex-wrap">
             {["全部", ...ORIENTATIONS].map((o) => (
               <Pill
                 key={o}
@@ -172,14 +172,14 @@ export default function FilterBar(props) {
         </div>
 
         {/* 移动端“重置” */}
-        <div className="mt-2 text-right sm:hidden">
+        <div className="mt-2 flex justify-end sm:hidden">
           <ResetButton />
         </div>
 
         {/* 标签 */}
         <div className="mt-3">
-          <div className="flex items-center gap-2">
-            <div className="text-sm text-gray-600 shrink-0">标签：</div>
+          <div className="grid grid-cols-[auto,1fr] items-start gap-2 sm:flex sm:items-center">
+            <div className="shrink-0 whitespace-nowrap text-sm text-gray-600">标签：</div>
             <button
               type="button"
               onClick={() => setTagPanelOpen((v) => !v)}
