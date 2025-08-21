@@ -8,6 +8,7 @@ const ORI_COLOR = {
   "男主无CP": { bg: "#EAFBEF", text: "#047857", border: "#D9F7E4" },
   "女主无CP": { bg: "#FFF0F5", text: "#DB2777", border: "#FFE1EC" },
   "男频": { bg: "#ECF3FF", text: "#2563EB", border: "#DDE9FF" },
+  "女频": { bg: "#F5F3FF", text: "#7C3AED", border: "#EDE9FE" },
   "其他": { bg: "#F3F4F6", text: "#374151", border: "#E5E7EB" },
 };
 
