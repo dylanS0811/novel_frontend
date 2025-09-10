@@ -9,6 +9,7 @@ import Leaderboard from "../components/Leaderboard";
 import NovelCard from "../components/NovelCard";
 import Pagination from "../components/Pagination";
 import { THEME } from "../lib/theme";
+import { useLanguage } from "../i18n";
 
 // 用 hooks 拉取后端 /api/books
 import { useBooks } from "../api/hooks";
@@ -16,6 +17,7 @@ import { useBooks } from "../api/hooks";
 export default function HomePage() {
   const nav = useNavigate();
   const qc = useQueryClient();
+  const { t } = useLanguage();
 
   // —— 防重复请求（点赞/收藏）——
   const likePending = React.useRef(new Set());
@@ -167,7 +169,7 @@ export default function HomePage() {
           </div>
 
           {isLoading ? (
-            <div className="text-sm text-gray-500 py-8">加载中...</div>
+            <div className="text-sm text-gray-500 py-8">{t("loading")}</div>
           ) : viewItems.length === 0 ? (
             <div className="text-sm text-gray-500 py-8">
               {includeTags.length || excludeTags.length

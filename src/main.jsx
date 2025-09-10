@@ -5,6 +5,7 @@ import { BrowserRouter } from "react-router-dom";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import App from "./App.jsx";
 import "./index.css";
+import { LanguageProvider } from "./i18n";
 
 // 关键：用命名空间导入，自动兼容不同导出名
 import * as AppStore from "./store/AppStore";
@@ -28,9 +29,11 @@ ReactDOM.createRoot(document.getElementById("root")).render(
   <React.StrictMode>
     <BrowserRouter>
       <QueryClientProvider client={qc}>
-        <StoreProvider>
-          <App />
-        </StoreProvider>
+        <LanguageProvider>
+          <StoreProvider>
+            <App />
+          </StoreProvider>
+        </LanguageProvider>
       </QueryClientProvider>
     </BrowserRouter>
   </React.StrictMode>

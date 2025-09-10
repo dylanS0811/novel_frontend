@@ -3,6 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Crown } from "lucide-react";
 import { THEME } from "../lib/theme";
 import { aggregateUserHeat } from "../lib/utils";
+import { useLanguage } from "../i18n";
 
 /**
  * 销冠 / 新秀 排行榜（默认 Top 10）
@@ -15,6 +16,7 @@ import { aggregateUserHeat } from "../lib/utils";
  */
 export default function Leaderboard({ items = [], onOpenUser, fetcher }) {
   const [tab, setTab] = useState("champion"); // champion | rookie
+  const { t } = useLanguage();
 
   // 后端数据（优先使用）：使用 React Query 以便通过 invalidateQueries 触发实时刷新
   const {
@@ -98,7 +100,7 @@ export default function Leaderboard({ items = [], onOpenUser, fetcher }) {
       {/* 列表 */}
       <div className="p-4">
         {remoteLoading && (
-          <div className="text-sm text-gray-500 px-2 pb-2">加载中…</div>
+          <div className="text-sm text-gray-500 px-2 pb-2">{t("loading")}</div>
         )}
 
         <div className="space-y-3">

@@ -10,6 +10,7 @@ import { tagApi, bookApi } from "../../api/sdk";
 import { useAppStore } from "../../store/AppStore";
 import { useCreateBook } from "../../api/hooks";
 import { useQueryClient } from "@tanstack/react-query";
+import { useLanguage } from "../../i18n";
 
 /** 顶部轻提示（2s 自动消失，玻璃风） */
 function Toast({ message = "", type = "success", onClose }) {
@@ -97,6 +98,7 @@ export default function UploadDrawer({ open, onClose, onSubmit }) {
   const qc = useQueryClient();
   const createBook = useCreateBook();
   const { user, setPage } = useAppStore();
+  const { t } = useLanguage();
 
   const allBaseTags = useMemo(() => Array.from(new Set(TAGS)), []);
   const [remoteSuggest, setRemoteSuggest] = useState([]);
@@ -174,7 +176,7 @@ export default function UploadDrawer({ open, onClose, onSubmit }) {
       const created = res?.data || res || null;
 
       // 轻提示
-      setToast({ msg: "发布成功", type: "success" });
+      setToast({ msg: t("publish_success"), type: "success" });
 
       // 关闭 + 清表单
       setTimeout(() => {
@@ -196,7 +198,7 @@ export default function UploadDrawer({ open, onClose, onSubmit }) {
       return created || true;
     } catch (e) {
       console.error("create book failed", e);
-      setToast({ msg: "发布失败", type: "error" });
+      setToast({ msg: t("publish_failed"), type: "error" });
       throw e;
     } finally {
       setSubmitting(false);
@@ -206,7 +208,7 @@ export default function UploadDrawer({ open, onClose, onSubmit }) {
   // 点击发布
   const handleSubmit = async () => {
     if (!title.trim()) {
-      setToast({ msg: "请先填写书名", type: "error" });
+      setToast({ msg: t("need_title"), type: "error" });
       return;
     }
     if (submitting) return;
@@ -216,7 +218,7 @@ export default function UploadDrawer({ open, onClose, onSubmit }) {
       const resp = await bookApi.checkExist({ title, author });
       const exists = resp?.data?.exists ?? resp?.exists;
       if (exists) {
-        setToast({ msg: "已存在同名书籍", type: "error" });
+        setToast({ msg: t("title_exists"), type: "error" });
         return;
       }
     } catch (e) {
@@ -448,7 +450,7 @@ export default function UploadDrawer({ open, onClose, onSubmit }) {
                   style={{ borderColor: THEME.border, background: THEME.surface }}
                   disabled={submitting}
                 >
-                  取消
+                  {t("cancel")}
                 </button>
                 <button
                   onClick={handleSubmit}
@@ -460,7 +462,7 @@ export default function UploadDrawer({ open, onClose, onSubmit }) {
                   }}
                   disabled={submitting}
                 >
-                  {submitting ? "发布中…" : "发布"}
+                  {submitting ? t("publishing") : t("publish")}
                 </button>
               </div>
             </div>

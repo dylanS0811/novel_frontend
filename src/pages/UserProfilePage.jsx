@@ -5,6 +5,7 @@ import NovelCard from "../components/NovelCard";
 import Pagination from "../components/Pagination";
 import { useAppStore } from "../store/AppStore";
 import { useBooks } from "../api/hooks";
+import { useLanguage } from "../i18n";
 
 export default function UserProfilePage() {
   const { nick } = useParams();
@@ -25,6 +26,7 @@ export default function UserProfilePage() {
   const data = res?.data || res || {};
   const recs = data.list ?? data.items ?? [];
   const total = data.total ?? recs.length ?? 0;
+  const { t } = useLanguage();
 
   // 头像：优先用书卡里 recommender.avatar（若能命中），否则占位
   const avatarFromBooks =
@@ -48,7 +50,7 @@ export default function UserProfilePage() {
 
       <div className="mt-6 text-lg font-semibold">TA推荐的书（{total}）</div>
       {isLoading ? (
-        <div className="mt-3 text-sm text-gray-500">加载中...</div>
+        <div className="mt-3 text-sm text-gray-500">{t("loading")}</div>
       ) : (
         <>
           <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-4">
