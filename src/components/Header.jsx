@@ -19,6 +19,8 @@ import { THEME } from "../lib/theme";
 import { classNames } from "../lib/utils";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useAppStore } from "../store/AppStore";
+import { useLanguage } from "../i18n";
+import LanguageToggle from "./LanguageToggle";
 
 function FilterPill({ active, onClick, icon, label, grad }) {
   return (
@@ -50,6 +52,7 @@ export default function Header(props) {
   const tab = store.tab;
   const setTab = store.setTab;
   const onOpenUpload = props.onOpenUpload ?? (() => store.setShowUpload(true));
+  const { t } = useLanguage();
 
   // 搜索
   const [q, setQ] = useState(store.search || "");
@@ -144,7 +147,7 @@ export default function Header(props) {
               value={q}
               onChange={(e) => setQ(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && triggerSearch()}
-              placeholder="搜索 书名/作者/标签"
+              placeholder={t("searchPlaceholder")}
               className="w-56 outline-none bg-transparent"
             />
             <button
@@ -152,9 +155,9 @@ export default function Header(props) {
               onClick={triggerSearch}
               className="px-3 py-1 rounded-full text-white"
               style={{ background: "linear-gradient(135deg, #F472B6 0%, #FB7185 100%)" }}
-              title="搜索"
+              title={t("search")}
             >
-              搜索
+              {t("search")}
             </button>
           </div>
 
@@ -163,7 +166,7 @@ export default function Header(props) {
             onClick={() => setMobileSearchOpen(true)}
             className="md:hidden p-2 rounded-md hover:bg-rose-50"
             type="button"
-            title="搜索"
+            title={t("search")}
           >
             <Search className="w-6 h-6" />
           </button>
@@ -173,10 +176,12 @@ export default function Header(props) {
             onClick={() => setMobileMenuOpen(true)}
             className="md:hidden p-2 rounded-md hover:bg-rose-50"
             type="button"
-            title="菜单"
+            title={t("menu")}
           >
             <Menu className="w-6 h-6" />
           </button>
+
+          <LanguageToggle />
 
           {/* 闪电上传 */}
           <button
@@ -190,7 +195,7 @@ export default function Header(props) {
             type="button"
           >
             <Upload className="w-4 h-4" />
-            闪电上传
+            {t("quickUpload")}
           </button>
 
           {/* 登录 / 个人中心（带下拉） */}

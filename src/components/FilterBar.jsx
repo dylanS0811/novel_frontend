@@ -7,6 +7,7 @@ import { useAppStore } from '../store/AppStore';
 import { CATEGORIES, ORIENTATIONS } from '../lib/constants';
 import { tagApi } from '../api/sdk';
 import { showToast } from './ui/Toast';
+import { useLanguage } from '../i18n';
 
 function Pill({ active, onClick, label, kind = 'cat' }) {
   // kind: "cat" | "ori" -> 仅视觉区分不同选中颜色
@@ -43,6 +44,7 @@ function Pill({ active, onClick, label, kind = 'cat' }) {
  */
 export default function FilterBar(props) {
   const store = useAppStore();
+  const { t } = useLanguage();
 
   const [tagPanelOpen, setTagPanelOpen] = useState(false);
   const [tagQuery, setTagQuery] = useState('');
@@ -223,7 +225,7 @@ export default function FilterBar(props) {
                   return (
                     <div className="h-44 sm:h-48 overflow-auto flex flex-wrap content-start gap-2 text-sm w-full pr-1">
                       {loadingTags ? (
-                        <div className="text-gray-500 m-2">加载中...</div>
+                        <div className="text-gray-500 m-2">{t('loading')}</div>
                       ) : tagError ? (
                         <div className="text-gray-500 m-2">
                           标签加载失败，请重试
