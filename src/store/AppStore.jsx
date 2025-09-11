@@ -646,7 +646,7 @@ export function AppProvider({ children }) {
         page,
         size,
       });
-      const data = res?.data || res || {};
+      const data = res || {};
       const list = data.list ?? data.items ?? [];
       setItems(list);
       setTotal(data.total ?? list.length ?? 0);
@@ -730,7 +730,7 @@ export function AppProvider({ children }) {
           page,
           size,
         });
-        const data = res?.data || res || {};
+        const data = res || {};
         const list = data.list ?? data.items ?? [];
         if (!aborted) {
           setItems(list);

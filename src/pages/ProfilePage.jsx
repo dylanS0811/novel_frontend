@@ -165,7 +165,7 @@ export function BookshelfSection() {
           size: 100,
           ...(user?.id ? { recommenderId: user.id } : { recommender: nick }),
         });
-        const data = res?.data || res || {};
+        const data = res || {};
         const list = data.list ?? data.items ?? [];
         if (!aborted) setMyRecs(list);
       } catch (e) {

@@ -56,8 +56,11 @@ export default function Header(props) {
 
   // 搜索
   const [q, setQ] = useState(store.search || "");
+  const inputRef = useRef(null);
   const triggerSearch = () => {
-    store.setSearch((q || "").trim());
+    const val = (inputRef.current?.value ?? q ?? "").trim();
+    setQ(val);
+    store.setSearch(val);
     store.setPage(1);
     if (!isHome) nav("/");
   };
@@ -147,6 +150,7 @@ export default function Header(props) {
           >
             <Search className="w-4 h-4 text-gray-500" />
             <input
+              ref={inputRef}
               value={q}
               onChange={(e) => setQ(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && triggerSearch()}
@@ -288,6 +292,7 @@ export default function Header(props) {
           >
             <Search className="w-4 h-4 text-gray-500" />
             <input
+              ref={inputRef}
               value={q}
               onChange={(e) => setQ(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && triggerSearch()}
