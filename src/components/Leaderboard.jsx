@@ -60,7 +60,7 @@ export default function Leaderboard({ items = [], onOpenUser, fetcher }) {
         style={{ background: "linear-gradient(135deg,#F59E0B,#FBBF24)" }}
       >
         <Crown className="w-5 h-5" />
-        <div className="font-semibold">排行榜</div>
+        <div className="font-semibold">{t("leaderboard")}</div>
 
         {/* 分段开关：选中更明显 */}
         <div className="ml-auto">
@@ -74,10 +74,10 @@ export default function Leaderboard({ items = [], onOpenUser, fetcher }) {
                   ? "bg-white text-amber-700 shadow-sm"
                   : "bg-transparent text-white/90 hover:text-white")
               }
-              title="历史累计热度"
+              title={t("championTitle")}
               type="button"
             >
-              销冠
+              {t("champion")}
             </button>
             <button
               onClick={() => setTab("rookie")}
@@ -88,10 +88,10 @@ export default function Leaderboard({ items = [], onOpenUser, fetcher }) {
                   ? "bg白 text-amber-700 shadow-sm"
                   : "bg-transparent text-white/90 hover:text-white")
               }
-              title="近30天热度"
+              title={t("rookieTitle")}
               type="button"
             >
-              新秀
+              {t("rookie")}
             </button>
           </div>
         </div>
@@ -146,12 +146,12 @@ export default function Leaderboard({ items = [], onOpenUser, fetcher }) {
           })}
 
           {!remoteLoading && list.length === 0 && (
-            <div className="text-sm text-gray-500 px-2">暂无数据</div>
+            <div className="text-sm text-gray-500 px-2">{t("noData")}</div>
           )}
         </div>
 
         <div className="text-[11px] text-gray-400 mt-3 px-2">
-          {tab === "champion" ? "历史累计热度" : "近30天热度"} = 评论×1 + 收藏×2 + 点赞×3
+          {`${tab === "champion" ? t("championTitle") : t("rookieTitle")} = ${t("heatFormula")}`}
         </div>
       </div>
     </div>

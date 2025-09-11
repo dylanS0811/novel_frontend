@@ -6,11 +6,13 @@ import { Upload, Bell, LogIn, User2, X } from "lucide-react";
 import { THEME } from "../../lib/theme";
 import { useAppStore } from "../../store/AppStore";
 import { useNavigate } from "react-router-dom";
+import { useLanguage } from "../../i18n";
 
 export default function MobileMenuDrawer({ open, onClose, onOpenUpload }) {
   const store = useAppStore();
   const nav = useNavigate();
   const ref = useRef(null);
+  const { t } = useLanguage();
 
   useEffect(() => {
     if (!open) return;
@@ -93,17 +95,17 @@ export default function MobileMenuDrawer({ open, onClose, onOpenUpload }) {
                 onClick={() => onClose?.()}
                 className="p-2 rounded-md hover:bg-rose-50"
                 type="button"
-                title="关闭"
+                title={t("close")}
               >
                 <X className="w-6 h-6" />
               </button>
             </div>
             <nav className="flex-1 py-2">
-              <MenuButton icon={Upload} label="上传" onClick={triggerUpload} />
-              <MenuButton icon={Bell} label="通知" onClick={triggerNotify} />
+              <MenuButton icon={Upload} label={t("upload") } onClick={triggerUpload} />
+              <MenuButton icon={Bell} label={t("notifications")} onClick={triggerNotify} />
               <MenuButton
                 icon={store.user ? User2 : LogIn}
-                label={store.user ? "我的主页" : "登录/注册"}
+                label={store.user ? t("myHome") : t("loginRegister")}
                 onClick={triggerProfile}
               />
             </nav>

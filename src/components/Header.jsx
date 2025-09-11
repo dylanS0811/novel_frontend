@@ -238,7 +238,7 @@ export default function Header(props) {
                     className="w-full text-left flex items-center gap-2 px-3 py-2 text-sm hover:bg-rose-50"
                   >
                     <User2 className="w-4 h-4" />
-                    我的主页
+                    {t("myHome")}
                   </button>
 
                   <div className="h-px my-1" style={{ background: "#f3e7eb" }} />
@@ -248,7 +248,7 @@ export default function Header(props) {
                     className="w-full text-left flex items-center gap-2 px-3 py-2 text-sm text-rose-600 hover:bg-rose-50"
                   >
                     <LogOut className="w-4 h-4" />
-                    退出登录
+                    {t("signOut")}
                   </button>
                 </div>
               )}
@@ -343,10 +343,10 @@ export default function Header(props) {
       />
       <ConfirmModal
         open={confirmOpen}
-        title="退出登录"
-        content="确定要退出当前账号吗？"
-        confirmText="退出"
-        cancelText="取消"
+        title={t("signOut")}
+        content={t("logoutPrompt")}
+        confirmText={t("signOut")}
+        cancelText={t("cancel")}
         onConfirm={doLogout}
         onCancel={() => setConfirmOpen(false)}
       />
