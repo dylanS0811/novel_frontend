@@ -4,6 +4,7 @@ import { ORIENTATIONS, CATEGORIES } from "../../lib/constants";
 import CuteSelect from "../ui/CuteSelect";
 import { THEME } from "../../lib/theme";
 import { useAppStore } from "../../store/AppStore";
+import { useLanguage } from "../../i18n";
 
 export default function BottomSheetForm({
   mode = "list",
@@ -13,6 +14,7 @@ export default function BottomSheetForm({
   initialValues = {},
 }) {
   const { user } = useAppStore();
+  const { t } = useLanguage();
   const storageKey = useMemo(
     () => `bsf-${user?.id || "guest"}-${mode}`,
     [user?.id, mode]
@@ -199,7 +201,7 @@ export default function BottomSheetForm({
                         value={form.orientation}
                         onChange={handleChange("orientation")}
                         options={ORIENTATIONS}
-                        placeholder="请选择性向"
+                        placeholder={t('selectOrientationPlaceholder')}
                       />
                     </div>
                     <div>
@@ -208,7 +210,7 @@ export default function BottomSheetForm({
                         value={form.category}
                         onChange={handleChange("category")}
                         options={CATEGORIES}
-                        placeholder="请选择类别"
+                        placeholder={t('selectCategoryPlaceholder')}
                       />
                     </div>
                   </div>

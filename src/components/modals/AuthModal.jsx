@@ -13,6 +13,7 @@ import {
 import { THEME } from "../../lib/theme";
 import { useAppStore } from "../../store/AppStore";
 import { meApi } from "../../api/sdk";
+import { useLanguage } from "../../i18n";
 
 /** -----------------------------------------------
  * 新版 登录 / 注册 弹窗
@@ -23,6 +24,7 @@ import { meApi } from "../../api/sdk";
  * ------------------------------------------------ */
 export default function AuthModal({ open, onClose }) {
   const { loginWithCredentials, registerAccount } = useAppStore();
+  const { t } = useLanguage();
 
   const [mode, setMode] = useState("login"); // 'login' | 'register'
   const [handle, setHandle] = useState("");  // 用户名/邮箱/手机号
@@ -234,7 +236,7 @@ export default function AuthModal({ open, onClose }) {
                     onChange={(e) => setHandle(e.target.value)}
                     onKeyDown={onKeyDown}
                     className="flex-1 outline-none bg-transparent text-sm"
-                    placeholder="如：aqiuyu、name@example.com 或 13000000000"
+                    placeholder={t('handlePlaceholder')}
                   />
                 </div>
               {handleError && (
@@ -253,7 +255,7 @@ export default function AuthModal({ open, onClose }) {
                     onChange={(e) => setNick(e.target.value)}
                     onKeyDown={onKeyDown}
                     className="flex-1 outline-none bg-transparent text-sm"
-                    placeholder="昵称（对外展示，可修改）"
+                    placeholder={t('nicknamePlaceholder')}
                   />
                 </div>
                 {nickError && (
@@ -273,7 +275,7 @@ export default function AuthModal({ open, onClose }) {
                     onChange={(e) => setPassword(e.target.value)}
                     onKeyDown={onKeyDown}
                     className="flex-1 outline-none bg-transparent text-sm"
-                    placeholder="请输入密码"
+                    placeholder={t('passwordPlaceholder')}
                   />
                   <button
                     type="button"
@@ -299,7 +301,7 @@ export default function AuthModal({ open, onClose }) {
                       onChange={(e) => setConfirm(e.target.value)}
                       onKeyDown={onKeyDown}
                       className="flex-1 outline-none bg-transparent text-sm"
-                      placeholder="请再次输入密码"
+                      placeholder={t('confirmPasswordPlaceholder')}
                     />
                     <button
                       type="button"

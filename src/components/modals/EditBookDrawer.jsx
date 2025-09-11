@@ -8,6 +8,7 @@ import { THEME } from "../../lib/theme";
 import { tagApi, bookApi } from "../../api/sdk";
 import { useAppStore } from "../../store/AppStore";
 import { useUpdateBook } from "../../api/hooks";
+import { useLanguage } from "../../i18n";
 
 // 简易 Toast（沿用 UploadDrawer 的样式）
 function Toast({ message = "", type = "success", onClose }) {
@@ -112,7 +113,7 @@ export default function EditBookDrawer({ open, bookId, onClose }) {
   const [editableUntil, setEditableUntil] = useState(null);
   const [remaining, setRemaining] = useState(0);
   const [expired, setExpired] = useState(false);
-
+  const { t } = useLanguage();
   const { user } = useAppStore();
   const updateBook = useUpdateBook(bookId, user?.id);
 
@@ -322,7 +323,7 @@ export default function EditBookDrawer({ open, bookId, onClose }) {
                       setErrors((er) => ({ ...er, author: null }));
                     }}
                     className="w-full border rounded-xl px-3 py-2 bg-white/70"
-                    placeholder="可选"
+                    placeholder={t('optional')}
                     style={{ borderColor: errors.author ? "#f43f5e" : THEME.border }}
                     disabled={submitting || expired}
                   />
@@ -337,7 +338,7 @@ export default function EditBookDrawer({ open, bookId, onClose }) {
                     onChange={(e) => setOrientation(e.target.value)}
                     options={ORIENTATIONS}
                     disabled={submitting || expired}
-                    placeholder="请选择性向"
+                    placeholder={t('selectOrientationPlaceholder')}
                   />
                 </div>
                 <div>
@@ -347,7 +348,7 @@ export default function EditBookDrawer({ open, bookId, onClose }) {
                     onChange={(e) => setCategory(e.target.value)}
                     options={CATEGORIES}
                     disabled={submitting || expired}
-                    placeholder="请选择类别"
+                    placeholder={t('selectCategoryPlaceholder')}
                   />
                 </div>
               </div>
@@ -361,8 +362,8 @@ export default function EditBookDrawer({ open, bookId, onClose }) {
                       setBlurb(e.target.value);
                       setErrors((er) => ({ ...er, blurb: null }));
                     }}
-                    className="w-full border rounded-xl px-3 py-2 h-20 bg-white/70 resize-y"
-                    placeholder="一句话强推理由（建议≤60字）"
+                      className="w-full border rounded-xl px-3 py-2 h-20 bg-white/70 resize-y"
+                      placeholder={t('oneSentenceReasonPlaceholder')}
                     style={{ borderColor: errors.blurb ? "#f43f5e" : THEME.border }}
                     disabled={submitting || expired}
                   />
@@ -378,8 +379,8 @@ export default function EditBookDrawer({ open, bookId, onClose }) {
                       setSummary(e.target.value);
                       setErrors((er) => ({ ...er, summary: null }));
                     }}
-                    className="w-full border rounded-xl px-3 py-2 h-20 bg-white/70"
-                    placeholder="内容梗概（建议≤200字）"
+                      className="w-full border rounded-xl px-3 py-2 h-20 bg-white/70"
+                      placeholder={t('summaryPlaceholder')}
                     style={{ borderColor: errors.summary ? "#f43f5e" : THEME.border }}
                     disabled={submitting || expired}
                   />
@@ -421,14 +422,14 @@ export default function EditBookDrawer({ open, bookId, onClose }) {
                 {/* 输入 + 自动补全 */}
                 {!expired && (
                   <div className="mt-2 flex flex-col gap-2">
-                    <input
-                      value={tagInput}
-                      onChange={(e) => setTagInput(e.target.value)}
-                      onKeyDown={onTagKeyDown}
-                      className="w-full border rounded-xl px-3 py-2 bg-white/70"
-                      placeholder="输入标签后回车添加；支持自动检索"
-                      style={{ borderColor: THEME.border }}
-                    />
+                      <input
+                        value={tagInput}
+                        onChange={(e) => setTagInput(e.target.value)}
+                        onKeyDown={onTagKeyDown}
+                        className="w-full border rounded-xl px-3 py-2 bg-white/70"
+                        placeholder={t('tagInputPlaceholder')}
+                        style={{ borderColor: THEME.border }}
+                      />
 
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
                       {suggestions.map((s) => (

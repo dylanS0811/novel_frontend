@@ -3,6 +3,7 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronDown, Check } from 'lucide-react';
 import { THEME } from '../../lib/theme';
+import { useLanguage } from '../../i18n';
 
 /**
  * CuteSelect
@@ -17,11 +18,13 @@ import { THEME } from '../../lib/theme';
 export default function CuteSelect({
   value = '',
   options = [],
-  placeholder = '请选择',
+  placeholder,
   disabled = false,
   onChange,
   className = ''
 }) {
+  const { t } = useLanguage();
+  placeholder = placeholder ?? t('pleaseSelect');
   const [open, setOpen] = useState(false);
   const wrapRef = useRef(null);
   const btnRef = useRef(null);

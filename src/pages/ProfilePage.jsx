@@ -10,6 +10,7 @@ import NovelCard from "../components/NovelCard";
 import BookSheetPanel from "../components/BookSheetPanel";
 import { useAppStore } from "../store/AppStore";
 import { meApi, uploadApi, bookApi } from "../api/sdk";
+import { useLanguage } from "../i18n";
 
 /** 顶部轻提示（2 秒后自动消失）- 玻璃拟物 + 渐变描边 */
 function Toast({ message, onClose }) {
@@ -237,6 +238,7 @@ export function BookshelfSection() {
 
 export default function ProfilePage() {
   const { nick, setNick, avatar, setAvatar, setUser } = useAppStore();
+  const { t } = useLanguage();
   const [val, setVal] = useState(nick);
   const [toast, setToast] = useState("");
   const [saving, setSaving] = useState(false);
@@ -411,7 +413,7 @@ export default function ProfilePage() {
                     background:
                       "linear-gradient(180deg, #FFFFFF 0%, rgba(255,255,255,0.9) 100%)",
                   }}
-                  placeholder="输入新的昵称"
+                  placeholder={t('newNicknamePlaceholder')}
                 />
                 {/* 字符计数 */}
                 <div
