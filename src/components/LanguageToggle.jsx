@@ -7,7 +7,7 @@ export default function LanguageToggle() {
   const { lang, setLang } = useLanguage();
   return (
     <div
-      className="ml-2 flex rounded-full overflow-hidden border text-sm"
+      className="ml-2 flex shrink-0 rounded-full overflow-hidden border text-xs sm:text-sm"
       style={{ borderColor: THEME.border }}
     >
       <button
