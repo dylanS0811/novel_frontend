@@ -5,7 +5,7 @@ export default function LanguageToggle() {
   const { lang, toggle } = useLanguage();
   return (
     <label className="inline-flex items-center cursor-pointer ml-2">
-      <span className="mr-2 text-sm">{lang === "zh" ? "中文" : "EN"}</span>
+      <span className="mr-2 text-sm">{lang === "zh" ? "EN" : "中文"}</span>
       <input
         type="checkbox"
         className="sr-only"
