@@ -95,6 +95,11 @@ export const bookApi = {
     const p: Record<string, any> = { ...params };
     if (Array.isArray(p.includeTags)) p.includeTags = p.includeTags.join(',');
     if (Array.isArray(p.excludeTags)) p.excludeTags = p.excludeTags.join(',');
+    // 兼容后端可能使用 tagName/tags 作为参数名
+    if (p.tag) {
+      p.tagName = p.tagName || p.tag;
+      p.tags = p.tags || p.tag;
+    }
     const res = await http.get<{
       list: BookSummary[];
       page: number;
