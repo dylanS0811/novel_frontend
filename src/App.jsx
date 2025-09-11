@@ -52,20 +52,28 @@ function Shell() {
 
   const [showTop, setShowTop] = React.useState(false);
   React.useEffect(() => {
-    const getTop = () =>
-      document.scrollingElement?.scrollTop ??
-      window.pageYOffset ??
-      document.documentElement.scrollTop ??
-      document.body.scrollTop ??
-      0;
+    const getTop = () => {
+      const root = document.getElementById("root");
+      return (
+        root?.scrollTop ??
+        document.scrollingElement?.scrollTop ??
+        window.pageYOffset ??
+        document.documentElement.scrollTop ??
+        document.body.scrollTop ??
+        0
+      );
+    };
 
     const onScroll = () => setShowTop(getTop() > 200);
 
+    const root = document.getElementById("root");
     const targets = [
       window,
       document,
       document.documentElement,
       document.body,
+      document.scrollingElement,
+      root,
     ];
 
     targets.forEach((t) =>
