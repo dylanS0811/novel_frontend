@@ -18,6 +18,7 @@ import Chip from "./ui/Chip";
 import OriChip from "./ui/OriChip";
 import { Pencil } from "lucide-react";
 import { useAppStore } from "../store/AppStore";
+import { useLanguage } from "../i18n";
 
 export default function NovelCard({
   item,
@@ -44,6 +45,7 @@ export default function NovelCard({
   const author = item?.author || "佚名";
   const createdAt = formatDate(item?.createdAt);
   const { user } = useAppStore();
+  const { lang } = useLanguage();
   const isOwner =
     user?.id &&
     (item?.recommender?.id === user.id || item?.recommenderId === user.id);
@@ -166,16 +168,28 @@ export default function NovelCard({
             <div className="mt-1 flex items-center gap-2">
               <button
                 onClick={() => onOpenDetail && onOpenDetail(item)}
-                className="text-base sm:text-lg font-semibold hover:underline"
+                className={
+                  (lang === "en"
+                    ? "flex-1 min-w-0 text-left truncate "
+                    : "") +
+                  "text-base sm:text-lg font-semibold hover:underline"
+                }
                 title="查看详情"
                 style={{ color: "#374151" }}
               >
                 {item?.title || "未命名"}
               </button>
-              <span className="text-sm text-gray-500">作者：{author}</span>
+              <span
+                className={
+                  "text-sm text-gray-500" +
+                  (lang === "en" ? " shrink-0 whitespace-nowrap" : "")
+                }
+              >
+                作者：{author}
+              </span>
               <button
                 onClick={openSummary}
-                className="ml-auto inline-flex items-center gap-1 text-xs sm:text-sm px-2 py-1 rounded-full border"
+                className="ml-auto inline-flex items-center gap-1 text-xs sm:text-sm px-2 py-1 rounded-full border shrink-0"
                 style={{
                   borderColor: THEME.border,
                   background: THEME.surface,
@@ -200,8 +214,20 @@ export default function NovelCard({
             </div>
 
             <div
-              className="mt-3 text-sm sm:text-base leading-relaxed text-gray-700 overflow-hidden"
-              style={{ minHeight: 48 }}
+              className={
+                "mt-3 text-sm sm:text-base leading-relaxed text-gray-700" +
+                (lang === "en" ? " overflow-hidden" : "")
+              }
+              style={
+                lang === "en"
+                  ? {
+                      minHeight: 48,
+                      display: "-webkit-box",
+                      WebkitLineClamp: 3,
+                      WebkitBoxOrient: "vertical",
+                    }
+                  : undefined
+              }
             >
               {item?.blurb || "——"}
             </div>

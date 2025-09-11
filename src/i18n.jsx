@@ -89,7 +89,7 @@ async function translateDocument(lang) {
           )
             .then((res) => res.json())
             .then((data) => {
-              translated = data.responseData.translatedText || original;
+              translated = (data.responseData.translatedText || original).trim();
               cache[original] = translated;
             })
             .catch(() => {

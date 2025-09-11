@@ -67,7 +67,12 @@ export default function CuteSelect({
 
   const prettyLabel = (txt) => {
     const e = emojiMap[txt] || '💫';
-    return `${e}  ${txt}`;
+    return (
+      <>
+        <span aria-hidden="true">{e}</span>
+        <span className="ml-1">{txt}</span>
+      </>
+    );
   };
 
   // 点击外部关闭
@@ -143,7 +148,14 @@ export default function CuteSelect({
           className={`text-sm ${displayText ? 'text-gray-800' : 'text-gray-400'}`}
           style={{ fontWeight: 600 }}
         >
-          {displayText ? prettyLabel(displayText) : '🩷  ' + placeholder}
+          {displayText ? (
+            prettyLabel(displayText)
+          ) : (
+            <>
+              <span aria-hidden="true">🩷</span>
+              <span className="ml-1">{placeholder}</span>
+            </>
+          )}
         </span>
         <ChevronDown className="w-4 h-4 text-gray-400" />
       </button>
