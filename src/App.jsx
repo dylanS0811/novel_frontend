@@ -54,13 +54,14 @@ function Shell() {
   React.useEffect(() => {
     const getTop = () => {
       const root = document.getElementById("root");
-      return (
-        root?.scrollTop ??
-        document.scrollingElement?.scrollTop ??
-        window.pageYOffset ??
-        document.documentElement.scrollTop ??
-        document.body.scrollTop ??
-        0
+      // ⬆️ 关键修复：root.scrollTop 为 0 时仍会被 "??" 返回，导致始终认为未滚动。
+      // 为兼容任意滚动容器，取可能目标的最大值。
+      return Math.max(
+        root?.scrollTop ?? 0,
+        document.scrollingElement?.scrollTop ?? 0,
+        window.pageYOffset ?? 0,
+        document.documentElement.scrollTop ?? 0,
+        document.body.scrollTop ?? 0
       );
     };
 
