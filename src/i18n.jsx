@@ -150,28 +150,36 @@ async function translateDocument(lang) {
   const tasks = [];
   while (walker.nextNode()) {
     const node = walker.currentNode;
-    const original = node.__i18nOriginal || node.textContent;
-    if (!node.__i18nOriginal) node.__i18nOriginal = original;
+    const current = node.textContent;
+    const original = node.__i18nOriginal;
+
+    // When React or other code updates the text content, ensure we don't keep
+    // using a stale cached "original" value. Otherwise the translation logic
+    // below would keep restoring the old text (e.g. a previous count).
+    if (original !== current) {
+      node.__i18nOriginal = current;
+    }
+    const base = node.__i18nOriginal;
     if (lang === "zh") {
-      node.textContent = original;
+      node.textContent = base;
       continue;
     }
-    if (/\p{Script=Han}/u.test(original.trim())) {
-      let translated = cache[original];
+    if (/\p{Script=Han}/u.test(base.trim())) {
+      let translated = cache[base];
       if (!translated) {
         tasks.push(
           fetch(
             `https://api.mymemory.translated.net/get?q=${encodeURIComponent(
-              original
+              base
             )}&langpair=zh-CN|en-US`
           )
             .then((res) => res.json())
             .then((data) => {
-              translated = (data.responseData.translatedText || original).trim();
-              cache[original] = translated;
+              translated = (data.responseData.translatedText || base).trim();
+              cache[base] = translated;
             })
             .catch(() => {
-              translated = original;
+              translated = base;
             })
             .finally(() => {
               node.textContent = translated;
