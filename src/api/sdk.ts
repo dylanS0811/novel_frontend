@@ -91,16 +91,17 @@ export type BooksQuery = {
 };
 
 export const bookApi = {
-  list: (params: BooksQuery) => {
+  list: async (params: BooksQuery) => {
     const p: Record<string, any> = { ...params };
     if (Array.isArray(p.includeTags)) p.includeTags = p.includeTags.join(',');
     if (Array.isArray(p.excludeTags)) p.excludeTags = p.excludeTags.join(',');
-    return http.get<{
+    const res = await http.get<{
       list: BookSummary[];
       page: number;
       size: number;
       total: number;
     }>('/api/books', { params: p });
+    return res.data;
   },
 
   detail: (id: number) => http.get<BookSummary>(`/api/books/${id}`),

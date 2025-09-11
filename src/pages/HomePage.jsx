@@ -49,7 +49,7 @@ export default function HomePage() {
 
   // —— 拉取列表 —— //
   const isTagSearch = (search || "").startsWith("#");
-  const { data: res, isLoading } = useBooks({
+  const { data, isLoading } = useBooks({
     tab,
     category: category === "全部" ? undefined : category,
     orientation: orientation === "全部" ? undefined : orientation,
@@ -62,9 +62,8 @@ export default function HomePage() {
   });
 
   // 兼容 axios 拦截器（可能把 {code,msg,data} 拍平）
-  const data = res?.data || res || {};
-  const viewItems = data.list ?? data.items ?? [];
-  const total = data.total ?? viewItems.length ?? 0;
+  const viewItems = data?.list ?? data?.items ?? [];
+  const total = data?.total ?? viewItems.length ?? 0;
 
   // 兼容 id 字符串/数字的判断
   const hasId = (set, id) => set.has(id) || set.has(Number(id)) || set.has(String(id));
