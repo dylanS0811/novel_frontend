@@ -52,21 +52,28 @@ function Shell() {
 
   const [showTop, setShowTop] = React.useState(false);
   React.useEffect(() => {
-    const onScroll = () => {
-      const top =
-        window.pageYOffset ||
-        document.documentElement.scrollTop ||
-        document.body.scrollTop ||
-        0;
-      setShowTop(top > 200);
-    };
-    window.addEventListener("scroll", onScroll, { passive: true });
-    document.addEventListener("scroll", onScroll, { passive: true });
+    const getTop = () =>
+      document.scrollingElement?.scrollTop ??
+      window.pageYOffset ??
+      document.documentElement.scrollTop ??
+      document.body.scrollTop ??
+      0;
+
+    const onScroll = () => setShowTop(getTop() > 200);
+
+    const targets = [
+      window,
+      document,
+      document.documentElement,
+      document.body,
+    ];
+
+    targets.forEach((t) =>
+      t?.addEventListener("scroll", onScroll, { passive: true })
+    );
     onScroll();
-    return () => {
-      window.removeEventListener("scroll", onScroll);
-      document.removeEventListener("scroll", onScroll);
-    };
+    return () =>
+      targets.forEach((t) => t?.removeEventListener("scroll", onScroll));
   }, []);
 
   // 发布上传（保持原有本地插卡行为；UploadDrawer 里也已接上后端，二者兼容）
