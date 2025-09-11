@@ -9,7 +9,7 @@ import { useLanguage } from '../../i18n';
  * CuteSelect
  * props:
  *  - value: string
- *  - options: string[]
+ *  - options: (string | { label: string, value: string })[]
  *  - placeholder?: string
  *  - disabled?: boolean
  *  - onChange: (eventLike: { target: { value: string } }) => void
@@ -29,6 +29,15 @@ export default function CuteSelect({
   const wrapRef = useRef(null);
   const btnRef = useRef(null);
   const [hoverIdx, setHoverIdx] = useState(-1);
+
+  // 统一 options 结构：支持字符串或 {label,value}
+  const opts = useMemo(
+    () =>
+      (options || []).map((o) =>
+        typeof o === 'string' ? { label: o, value: o } : o
+      ),
+    [options]
+  );
 
   // 贴合现有主题的可爱小图标（展示用，不影响真实值）
   const emojiMap = useMemo(
@@ -90,41 +99,44 @@ export default function CuteSelect({
     if (!open) return;
     const onKey = (e) => {
       if (e.key === 'Escape') setOpen(false);
-      if (!options?.length) return;
+      if (!opts.length) return;
       if (e.key === 'ArrowDown') {
         e.preventDefault();
-        setHoverIdx((i) => (i + 1) % options.length);
+        setHoverIdx((i) => (i + 1) % opts.length);
       }
       if (e.key === 'ArrowUp') {
         e.preventDefault();
-        setHoverIdx((i) => (i - 1 + options.length) % options.length);
+        setHoverIdx((i) => (i - 1 + opts.length) % opts.length);
       }
       if (e.key === 'Enter') {
         e.preventDefault();
-        const idx = hoverIdx >= 0 ? hoverIdx : Math.max(0, options.indexOf(value));
-        const v = options[idx] ?? value ?? '';
+        const idx = hoverIdx >= 0 ? hoverIdx : Math.max(0, opts.findIndex(o => o.value === value));
+        const v = opts[idx]?.value ?? value ?? '';
         if (v && onChange) onChange({ target: { value: v } });
         setOpen(false);
       }
     };
     document.addEventListener('keydown', onKey);
     return () => document.removeEventListener('keydown', onKey);
-  }, [open, hoverIdx, options, value, onChange]);
+  }, [open, hoverIdx, opts, value, onChange]);
 
   // 打开时定位 hover 到当前值
   useEffect(() => {
     if (open) {
-      const idx = options.indexOf(value);
+      const idx = opts.findIndex(o => o.value === value);
       setHoverIdx(idx >= 0 ? idx : 0);
     }
-  }, [open, options, value]);
+  }, [open, opts, value]);
 
   const handlePick = (v) => {
     if (onChange) onChange({ target: { value: v } });
     setOpen(false);
   };
 
-  const displayText = value || '';
+  const displayText = useMemo(() => {
+    const found = opts.find((o) => o.value === value);
+    return found ? found.label : '';
+  }, [opts, value]);
 
   return (
     <div ref={wrapRef} className={`relative ${className}`}>
@@ -181,16 +193,16 @@ export default function CuteSelect({
                 boxShadow: '0 16px 42px rgba(244,114,182,0.25)'
               }}
             >
-              {options.map((opt, idx) => {
-                const selected = opt === value;
+              {opts.map((opt, idx) => {
+                const selected = opt.value === value;
                 const hovered = idx === hoverIdx;
                 return (
                   <div
-                    key={opt}
+                    key={opt.value}
                     role="option"
                     aria-selected={selected}
                     onMouseEnter={() => setHoverIdx(idx)}
-                    onClick={() => handlePick(opt)}
+                    onClick={() => handlePick(opt.value)}
                     className="px-3 py-2 cursor-pointer flex items-center justify-between"
                     style={{
                       background: hovered ? 'rgba(253, 242, 248, 0.9)' : 'transparent'
@@ -203,13 +215,13 @@ export default function CuteSelect({
                         fontWeight: selected ? 700 : 500
                       }}
                     >
-                      {prettyLabel(opt)}
+                      {prettyLabel(opt.label)}
                     </span>
                     {selected && <Check className="w-4 h-4" style={{ color: '#DB2777' }} />}
                   </div>
                 );
               })}
-              {!options?.length && <div className="px-3 py-3 text-sm text-gray-400">暂无选项</div>}
+              {!opts.length && <div className="px-3 py-3 text-sm text-gray-400">暂无选项</div>}
             </div>
           </motion.div>
         )}
