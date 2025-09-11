@@ -61,9 +61,19 @@ export default function HomePage() {
     size,
   });
 
-  // 兼容 axios 拦截器（可能把 {code,msg,data} 拍平）
-  const viewItems = data?.list ?? data?.items ?? [];
-  const total = data?.total ?? viewItems.length ?? 0;
+  // 兼容 axios 拦截器及不同返回格式
+  const viewItems =
+    data?.list ??
+    data?.items ??
+    data?.data?.list ??
+    data?.data?.items ??
+    [];
+  const total =
+    Number(
+      data?.total ??
+        data?.data?.total ??
+        (Array.isArray(viewItems) ? viewItems.length : 0)
+    );
 
   // 兼容 id 字符串/数字的判断
   const hasId = (set, id) => set.has(id) || set.has(Number(id)) || set.has(String(id));
