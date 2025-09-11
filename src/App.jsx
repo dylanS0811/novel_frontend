@@ -50,7 +50,9 @@ function Shell() {
 
   const [showTop, setShowTop] = React.useState(false);
   React.useEffect(() => {
-    const onScroll = () => setShowTop(window.scrollY > 200);
+    const getScrollTop = () =>
+      window.scrollY || document.documentElement.scrollTop || document.body.scrollTop || 0;
+    const onScroll = () => setShowTop(getScrollTop() > 200);
     window.addEventListener("scroll", onScroll);
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
