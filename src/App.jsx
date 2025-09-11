@@ -85,6 +85,18 @@ function Shell() {
       targets.forEach((t) => t?.removeEventListener("scroll", onScroll));
   }, []);
 
+  const scrollToTop = () => {
+    const root = document.getElementById("root");
+    const targets = [
+      window,
+      document.documentElement,
+      document.body,
+      document.scrollingElement,
+      root,
+    ];
+    targets.forEach((t) => t?.scrollTo?.({ top: 0, behavior: "smooth" }));
+  };
+
   // 发布上传（保持原有本地插卡行为；UploadDrawer 里也已接上后端，二者兼容）
   const onSubmitUpload = ({
     title,
@@ -150,7 +162,7 @@ function Shell() {
         <>
           {showTop && (
             <button
-              onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+              onClick={scrollToTop}
               title={t("backToTop")}
               className="fixed right-6 rounded-full shadow-md flex items-center justify-center"
               style={{
