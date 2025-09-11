@@ -114,7 +114,7 @@ export default function EditBookDrawer({ open, bookId, onClose }) {
   const [remaining, setRemaining] = useState(0);
   const [expired, setExpired] = useState(false);
   const { t } = useLanguage();
-  const { user } = useAppStore();
+  const { user, bumpBookRefresh } = useAppStore();
   const updateBook = useUpdateBook(bookId, user?.id);
 
   const allBaseTags = useMemo(() => Array.from(new Set(TAGS)), []);
@@ -244,6 +244,7 @@ export default function EditBookDrawer({ open, bookId, onClose }) {
     setSubmitting(true);
     try {
       await updateBook.mutateAsync(payload);
+      bumpBookRefresh();
       setToast({ msg: "已更新", type: "success" });
       setTimeout(() => {
         onClose && onClose();

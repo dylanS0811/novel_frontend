@@ -133,6 +133,8 @@ export function AppProvider({ children }) {
   const [commentsMap, setCommentsMap] = useState({});
   const [editingBook, setEditingBook] = useState(null);
   const [fabHidden, setFabHidden] = useState(false);
+  const [bookRefreshToken, setBookRefreshToken] = useState(0);
+  const bumpBookRefresh = () => setBookRefreshToken((n) => n + 1);
 
   const [tab, setTab] = useState(DEFAULTS.tab);
   const [category, setCategory] = useState(DEFAULTS.category);
@@ -888,6 +890,8 @@ export function AppProvider({ children }) {
       setEditingBook,
       fabHidden,
       setFabHidden,
+      bookRefreshToken,
+      bumpBookRefresh,
 
       // 筛选
       tab,
@@ -973,6 +977,8 @@ export function AppProvider({ children }) {
       moveBookToSheet,
       editingBook,
       fabHidden,
+      bookRefreshToken,
+      bumpBookRefresh,
     ]
   );
 
