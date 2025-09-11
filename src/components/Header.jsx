@@ -116,7 +116,7 @@ export default function Header(props) {
           {/* 品牌：点击回首页 + 清空筛选/搜索 + 默认新粮 */}
           <button
             onClick={goHomeReset}
-            className="flex items-center gap-3"
+            className="flex items-center gap-3 shrink-0"
             title="返回首页（清空筛选/搜索）"
             type="button"
           >
@@ -129,7 +129,10 @@ export default function Header(props) {
               >
                 摸鱼书架
               </div>
-              <div className="text-[12px] mt-0.5" style={{ color: "rgba(84, 65, 72, 0.52)" }}>
+              <div
+                className="text-[12px] mt-0.5 hidden sm:block"
+                style={{ color: "rgba(84, 65, 72, 0.52)" }}
+              >
                 分享你的宝藏小说
               </div>
             </div>
