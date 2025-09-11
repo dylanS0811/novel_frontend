@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { X, Heart } from "lucide-react";
 import { THEME } from "../../lib/theme";
 import { formatDate } from "../../lib/utils";
+import { useLanguage } from "../../i18n";
 
 // 评论抽屉，支持点赞与回复
 export default function CommentsDrawer({ open, onClose, item, list, onAdd, onLike }) {
@@ -11,6 +12,7 @@ export default function CommentsDrawer({ open, onClose, item, list, onAdd, onLik
   const [replyingId, setReplyingId] = useState(null);
   const [openReplies, setOpenReplies] = useState({});
   const replyInputRef = useRef(null);
+  const { t } = useLanguage();
 
   // 回复时自动聚焦输入框
   useEffect(() => {
@@ -100,7 +102,7 @@ export default function CommentsDrawer({ open, onClose, item, list, onAdd, onLik
                 ref={replyInputRef}
                 value={replyText}
                 onChange={(e) => setReplyText(e.target.value)}
-                placeholder="回复……"
+                placeholder={t('replyPlaceholder')}
                 className="flex-1 border rounded-xl px-3 py-1"
                 style={{ borderColor: THEME.border }}
               />
@@ -166,7 +168,7 @@ export default function CommentsDrawer({ open, onClose, item, list, onAdd, onLik
                 <input
                   value={text}
                   onChange={(e) => setText(e.target.value)}
-                  placeholder="说点什么……"
+                  placeholder={t('commentPlaceholder')}
                   className="flex-1 border rounded-xl px-3 py-2"
                   style={{ borderColor: THEME.border }}
                 />

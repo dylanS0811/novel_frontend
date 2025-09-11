@@ -288,7 +288,7 @@ export default function Header(props) {
               value={q}
               onChange={(e) => setQ(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && triggerSearch()}
-              placeholder="搜索 书名/作者/标签"
+              placeholder={t('searchPlaceholder')}
               className="flex-1 outline-none bg-transparent"
             />
             <button
@@ -296,9 +296,9 @@ export default function Header(props) {
               onClick={triggerSearch}
               className="px-3 py-1 rounded-full text-white"
               style={{ background: "linear-gradient(135deg, #F472B6 0%, #FB7185 100%)" }}
-              title="搜索"
+              title={t('search')}
             >
-              搜索
+              {t('search')}
             </button>
             <button
               onClick={() => setMobileSearchOpen(false)}

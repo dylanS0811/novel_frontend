@@ -298,7 +298,7 @@ export default function UploadDrawer({ open, onClose, onSubmit }) {
                     value={author}
                     onChange={(e) => setAuthor(e.target.value)}
                     className="w-full border rounded-xl px-3 py-2 bg-white/70"
-                    placeholder="可选"
+                    placeholder={t('optional')}
                     style={{ borderColor: THEME.border }}
                   />
                 </div>
@@ -308,7 +308,7 @@ export default function UploadDrawer({ open, onClose, onSubmit }) {
                     value={orientation}
                     onChange={(e) => setOrientation(e.target.value)}
                     options={ORIENTATIONS}
-                    placeholder="请选择性向"
+                    placeholder={t('selectOrientationPlaceholder')}
                   />
                 </div>
                 <div>
@@ -317,7 +317,7 @@ export default function UploadDrawer({ open, onClose, onSubmit }) {
                     value={category}
                     onChange={(e) => setCategory(e.target.value)}
                     options={CATEGORIES}
-                    placeholder="请选择类别"
+                    placeholder={t('selectCategoryPlaceholder')}
                   />
                 </div>
               </div>
@@ -329,7 +329,7 @@ export default function UploadDrawer({ open, onClose, onSubmit }) {
                     value={blurb}
                     onChange={(e) => setBlurb(e.target.value)}
                     className="w-full border rounded-xl px-3 py-2 h-20 bg白/70 resize-y"
-                    placeholder="一句话强推理由（建议≤60字）"
+                    placeholder={t('oneSentenceReasonPlaceholder')}
                     style={{ borderColor: THEME.border }}
                   />
                 </div>
@@ -339,7 +339,7 @@ export default function UploadDrawer({ open, onClose, onSubmit }) {
                     value={summary}
                     onChange={(e) => setSummary(e.target.value)}
                     className="w-full border rounded-xl px-3 py-2 h-20 bg白/70"
-                    placeholder="内容梗概（建议≤200字）"
+                    placeholder={t('summaryPlaceholder')}
                     style={{ borderColor: THEME.border }}
                   />
                 </div>
@@ -376,7 +376,7 @@ export default function UploadDrawer({ open, onClose, onSubmit }) {
                     onChange={(e) => setTagInput(e.target.value)}
                     onKeyDown={onTagKeyDown}
                     className="w-full border rounded-xl px-3 py-2 bg白/70"
-                    placeholder="输入标签后回车添加；支持自动检索"
+                    placeholder={t('tagInputPlaceholder')}
                     style={{ borderColor: THEME.border }}
                   />
 

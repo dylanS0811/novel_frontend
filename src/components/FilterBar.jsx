@@ -206,7 +206,7 @@ export default function FilterBar(props) {
                   type="text"
                   value={tagQuery}
                   onChange={(e) => setTagQuery(e.target.value)}
-                  placeholder="搜索标签（支持拼音/首字母）"
+                  placeholder={t('tagSearchPlaceholder')}
                   className="w-full pl-9 pr-3 py-2 rounded-lg text-sm border outline-none focus:ring-2 transition-shadow"
                   style={{
                     borderColor: THEME.border,
