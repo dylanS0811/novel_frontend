@@ -116,10 +116,13 @@ export function LanguageProvider({ children }) {
   const [lang, setLang] = useState(localStorage.getItem("lang") || "zh");
   const t = (key) =>
     lang === "en" ? resources.en[key] || cache[key] || key : resources.zh[key] || key;
-  const toggle = () => {
-    const next = lang === "zh" ? "en" : "zh";
+  const change = (next) => {
     setLang(next);
     localStorage.setItem("lang", next);
+  };
+  const toggle = () => {
+    const next = lang === "zh" ? "en" : "zh";
+    change(next);
   };
   useEffect(() => {
     translateDocument(lang);
@@ -128,7 +131,7 @@ export function LanguageProvider({ children }) {
     return () => observer.disconnect();
   }, [lang]);
   return (
-    <LanguageContext.Provider value={{ lang, toggle, t }}>
+    <LanguageContext.Provider value={{ lang, toggle, setLang: change, t }}>
       {children}
     </LanguageContext.Provider>
   );
