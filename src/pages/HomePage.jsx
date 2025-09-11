@@ -45,11 +45,12 @@ export default function HomePage() {
     size,
     setPage,
     setEditingBook,
+    bookRefreshToken,
   } = useAppStore();
 
   // —— 拉取列表 —— //
   const isTagSearch = (search || "").startsWith("#");
-  const { data, isLoading } = useBooks({
+  const { data, isLoading, refetch } = useBooks({
     tab,
     category: category === "全部" ? undefined : category,
     orientation: orientation === "全部" ? undefined : orientation,
@@ -104,6 +105,11 @@ export default function HomePage() {
       b.bookmarks = Math.max(0, Number(b.bookmarks || 0) + inc);
       return b;
     });
+
+  // 书籍更新后刷新首页列表
+  React.useEffect(() => {
+    refetch();
+  }, [bookRefreshToken, refetch]);
 
   /* ---------------- 交互回调 ---------------- */
 

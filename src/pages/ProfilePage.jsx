@@ -100,6 +100,7 @@ export function BookshelfSection() {
     setCommentsOpen,
     setEditingBook,
     user,
+    bookRefreshToken,
   } = useAppStore();
   const { t } = useLanguage();
   const [tab, setTab] = useState("fav"); // fav | rec | sheet
@@ -149,7 +150,7 @@ export function BookshelfSection() {
     return () => {
       aborted = true;
     };
-  }, [user?.id, savedIds]);
+  }, [user?.id, savedIds, bookRefreshToken]);
 
   // 拉取我推荐的书
   useEffect(() => {
@@ -175,7 +176,7 @@ export function BookshelfSection() {
     return () => {
       aborted = true;
     };
-  }, [nick, user?.id]);
+  }, [nick, user?.id, bookRefreshToken]);
 
   const list = tab === "fav" ? favorites : myRecs;
 
