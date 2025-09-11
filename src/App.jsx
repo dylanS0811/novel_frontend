@@ -19,9 +19,11 @@ import { useAppStore } from "./store/AppStore";
 import { Plus, ArrowUp } from "lucide-react";
 import { THEME } from "./lib/theme";
 import { ToastHost } from "./components/ui/Toast";
+import { useLanguage } from "./i18n";
 
 function Shell() {
   const qc = useQueryClient();
+  const { t } = useLanguage();
 
   const {
     showUpload,
@@ -50,11 +52,21 @@ function Shell() {
 
   const [showTop, setShowTop] = React.useState(false);
   React.useEffect(() => {
-    const getScrollTop = () =>
-      window.scrollY || document.documentElement.scrollTop || document.body.scrollTop || 0;
-    const onScroll = () => setShowTop(getScrollTop() > 200);
-    window.addEventListener("scroll", onScroll);
-    return () => window.removeEventListener("scroll", onScroll);
+    const onScroll = () => {
+      const top =
+        window.pageYOffset ||
+        document.documentElement.scrollTop ||
+        document.body.scrollTop ||
+        0;
+      setShowTop(top > 200);
+    };
+    window.addEventListener("scroll", onScroll, { passive: true });
+    document.addEventListener("scroll", onScroll, { passive: true });
+    onScroll();
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      document.removeEventListener("scroll", onScroll);
+    };
   }, []);
 
   // 发布上传（保持原有本地插卡行为；UploadDrawer 里也已接上后端，二者兼容）
@@ -123,7 +135,7 @@ function Shell() {
           {showTop && (
             <button
               onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
-              title="返回顶部"
+              title={t("backToTop")}
               className="fixed right-6 rounded-full shadow-md flex items-center justify-center"
               style={{
                 width: 40,
@@ -139,7 +151,7 @@ function Shell() {
           )}
           <button
             onClick={() => (user ? setShowUpload(true) : setAuthOpen(true))}
-            title="闪电上传"
+            title={t("quickUpload")}
             className="fixed bottom-6 right-6 rounded-full shadow-lg flex items-center justify-center"
             style={{
               width: 56,
