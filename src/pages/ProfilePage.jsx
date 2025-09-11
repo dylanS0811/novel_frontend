@@ -101,6 +101,7 @@ export function BookshelfSection() {
     setEditingBook,
     user,
   } = useAppStore();
+  const { t } = useLanguage();
   const [tab, setTab] = useState("fav"); // fav | rec | sheet
 
   const [favorites, setFavorites] = useState([]);
@@ -189,7 +190,7 @@ export function BookshelfSection() {
           )}
           style={{ borderColor: THEME.border }}
         >
-          我收藏的书
+          {t('myFavorites')}
         </button>
         <button
           onClick={() => setTab("rec")}
@@ -199,7 +200,7 @@ export function BookshelfSection() {
           )}
           style={{ borderColor: THEME.border }}
         >
-          我推荐的书
+          {t('myRecs')}
         </button>
         <button
           onClick={() => setTab("sheet")}
@@ -209,7 +210,7 @@ export function BookshelfSection() {
           )}
           style={{ borderColor: THEME.border }}
         >
-          我的个人书单
+          {t('myBookSheets')}
         </button>
       </div>
 
@@ -229,7 +230,9 @@ export function BookshelfSection() {
               onEdit={() => setEditingBook(item)}
             />
           ))}
-          {list.length === 0 && <div className="text-sm text-gray-500">暂无内容</div>}
+          {list.length === 0 && (
+            <div className="text-sm text-gray-500">{t('noContent')}</div>
+          )}
         </div>
       )}
     </div>
@@ -267,14 +270,14 @@ export default function ProfilePage() {
 
       // 1) 空校验
       if (!trimmed) {
-        setToast("请输入昵称");
+        setToast(t('enterNickname'));
         return;
       }
       // 2) 重名校验
       const ck = await meApi.checkNickname(trimmed);
       const exists = ck?.data?.exists ?? ck?.exists;
       if (exists) {
-        setToast("昵称已被占用");
+        setToast(t('nicknameTaken'));
         return;
       }
 
@@ -283,10 +286,10 @@ export default function ProfilePage() {
       const d = r?.data ?? r ?? {};
       setNick(d.nick ?? d.name ?? trimmed);
       setUser((u) => (u ? { ...u, nick: d.nick ?? d.name ?? trimmed } : u));
-      setToast("保存成功");
+      setToast(t('saveSuccess'));
     } catch (e) {
       console.error("update nickname failed", e);
-      setToast("保存失败");
+      setToast(t('saveFailed'));
     } finally {
       setSaving(false);
     }
@@ -298,11 +301,11 @@ export default function ProfilePage() {
     const file = e.target.files?.[0];
     if (!file) return;
     if (!/(image\/jpeg|image\/png)/.test(file.type)) {
-      setToast("仅支持 JPG/PNG 格式");
+      setToast(t('avatarType')); // custom key
       return;
     }
     if (file.size > 2 * 1024 * 1024) {
-      setToast("图片过大，请压缩后再试（≤2MB）");
+      setToast(t('avatarTooLarge'));
       return;
     }
     try {
@@ -314,14 +317,14 @@ export default function ProfilePage() {
       setAvatar(tsUrl);
       setUser((u) => (u ? { ...u, avatar: tsUrl } : u));
       await meApi.patch({ avatarUrl: url });
-      setToast("上传成功");
+      setToast(t('uploadSuccess'));
     } catch (err) {
       console.error("upload avatar failed", err);
       const status = err?.response?.status;
-      if (status === 413) setToast("图片过大");
-      else if (status === 415) setToast("类型不支持");
-      else if (status === 400) setToast(err?.response?.data?.message || "校验失败");
-      else setToast("上传失败，请稍后重试");
+      if (status === 413) setToast(t('avatarTooLargeSimple'));
+      else if (status === 415) setToast(t('avatarTypeUnsupported'));
+      else if (status === 400) setToast(err?.response?.data?.message || t('validationFailed'));
+      else setToast(t('uploadFailed'));
     } finally {
       setUploading(false);
     }
@@ -347,7 +350,7 @@ export default function ProfilePage() {
             className="absolute bottom-0 right-0 px-2 py-1 text-xs rounded-full border bg-white/80 disabled:opacity-60"
             style={{ borderColor: THEME.border }}
           >
-            更换
+            {t('change')}
           </button>
           <input
             ref={fileRef}
@@ -359,7 +362,7 @@ export default function ProfilePage() {
         </div>
         <div className="text-center sm:text-left">
           <div className="text-xl font-semibold">{nick}</div>
-          <div className="text-gray-500 text-sm">我的主页</div>
+          <div className="text-gray-500 text-sm">{t('myHome')}</div>
         </div>
       </div>
 
@@ -388,9 +391,11 @@ export default function ProfilePage() {
         >
           {/* 标题行 */}
           <div className="px-5 pt-4 pb-2 flex items-center justify-between">
-            <div className="text-sm font-semibold text-gray-700">修改昵称</div>
+            <div className="text-sm font-semibold text-gray-700">{t('editNickname')}</div>
             <div className="text-[12px] text-gray-400">
-              {MIN}–{MAX} 个字符
+              {t('charRange')
+                .replace('{min}', MIN)
+                .replace('{max}', MAX)}
             </div>
           </div>
 
@@ -438,17 +443,25 @@ export default function ProfilePage() {
                   boxShadow: "0 10px 24px rgba(244,114,182,0.25)",
                   border: "1px solid rgba(255,255,255,0.6)",
                 }}
-                title={invalid ? "昵称长度需在范围内" : unchanged ? "没有修改内容" : "保存"}
+                title={
+                  invalid
+                    ? t('nicknameLengthHint')
+                        .replace('{min}', MIN)
+                        .replace('{max}', MAX)
+                    : unchanged
+                    ? t('noChanges')
+                    : t('save')
+                }
               >
                 {saving ? (
                   <>
                     <Loader2 className="w-4 h-4 animate-spin" />
-                    保存中…
+                    {t('saving')}
                   </>
                 ) : (
                   <>
                     <Edit3 className="w-4 h-4" />
-                    保存
+                    {t('save')}
                   </>
                 )}
               </button>
@@ -458,10 +471,12 @@ export default function ProfilePage() {
             <div className="mt-2 min-h-[18px] text-[12px]">
               {invalid ? (
                 <span className="text-rose-500">
-                  昵称需在 {MIN}–{MAX} 个字符内
+                  {t('nicknameLengthError')
+                    .replace('{min}', MIN)
+                    .replace('{max}', MAX)}
                 </span>
               ) : (
-                <span className="text-gray-400">支持中英文、数字与常用符号</span>
+                <span className="text-gray-400">{t('nicknameTip')}</span>
               )}
             </div>
           </div>
